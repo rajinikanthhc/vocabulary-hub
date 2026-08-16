@@ -42,7 +42,6 @@ select {
 
 }
 
-
 /* =========================================
    TOPBAR
 ========================================= */
@@ -53,7 +52,13 @@ select {
 
   color: white;
 
-  padding: 18px 24px;
+  padding: 10px 22px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
 
   box-shadow:
     0 2px 8px
@@ -1103,6 +1108,38 @@ select {
 
   min-height: 42px;
 
+}
+
+/* =========================================
+   WORD NAVIGATION
+========================================= */
+
+.wordNavigation {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+
+.wordNavigation button {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+
+.wordNavigation button:hover {
+  background: #f2f2f2;
+}
+
+
+.wordNavigation button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 </style>

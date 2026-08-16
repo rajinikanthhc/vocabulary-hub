@@ -4,6 +4,7 @@ let vocabulary = [];
 let filteredVocabulary = [];
 let currentWord = null;
 let favoriteOnly = false;
+let currentWordIndex = -1;
 
 
 /* =========================================
@@ -715,6 +716,23 @@ function openWord(word) {
   currentWord = word;
 
 
+  /* =========================================
+     FIND CURRENT WORD POSITION
+  ========================================= */
+
+  currentWordIndex =
+    filteredVocabulary.findIndex(function(item) {
+
+      return String(item.ID) ===
+             String(word.ID);
+
+    });
+
+
+  /* =========================================
+     WORD DETAILS
+  ========================================= */
+
   document.getElementById('modalCategory')
     .textContent =
       word.Category || '';
@@ -723,43 +741,6 @@ function openWord(word) {
   document.getElementById('modalWord')
     .textContent =
       word.Word || '';
-
-
-  /* =========================================
-     LOAD GITHUB IMAGE
-  ========================================= */
-
-  const imageBox =
-    document.getElementById('modalImage');
-
-  imageBox.innerHTML = '';
-
-
-  if (word.Image) {
-
-    const image =
-      document.createElement('img');
-
-    image.src =
-      'https://raw.githubusercontent.com/' +
-      'rajinikanthhc/images/main/vocabulary/' +
-      encodeURIComponent(word.Image);
-
-
-    image.alt =
-      word.Word || 'Vocabulary image';
-
-
-    image.onerror = function () {
-
-      imageBox.innerHTML = '';
-
-    };
-
-
-    imageBox.appendChild(image);
-
-  }
 
 
   document.getElementById('modalMeaning')
@@ -787,8 +768,60 @@ function openWord(word) {
       word.Level || '-';
 
 
+  /* =========================================
+     LOAD GITHUB IMAGE
+  ========================================= */
+
+  const imageBox =
+    document.getElementById('modalImage');
+
+  imageBox.innerHTML = '';
+
+
+  if (word.Image) {
+
+    const image =
+      document.createElement('img');
+
+    image.src =
+      'https://raw.githubusercontent.com/' +
+      'rajinikanthhc/images/main/vocabulary/' +
+      encodeURIComponent(word.Image);
+
+
+    image.alt =
+      word.Word || 'Vocabulary image';
+
+
+    image.onerror = function() {
+
+      imageBox.innerHTML = '';
+
+    };
+
+
+    imageBox.appendChild(image);
+
+  }
+
+
+  /* =========================================
+     FAVORITE
+  ========================================= */
+
   updateModalFavorite();
 
+
+  /* =========================================
+     PREVIOUS / NEXT BUTTONS
+  ========================================= */
+
+  updateWordNavigation();
+
+
+  /* =========================================
+     OPEN MODAL
+  ========================================= */
 
   document.getElementById('wordModal')
     .style.display = 'block';
@@ -796,6 +829,85 @@ function openWord(word) {
 
   document.body.style.overflow =
     'hidden';
+
+}
+
+/* =========================================
+   UPDATE WORD NAVIGATION
+========================================= */
+
+function updateWordNavigation() {
+
+  const previousButton =
+    document.getElementById(
+      'previousWordButton'
+    );
+
+  const nextButton =
+    document.getElementById(
+      'nextWordButton'
+    );
+
+
+  if (!previousButton || !nextButton) {
+    return;
+  }
+
+
+  previousButton.disabled =
+    currentWordIndex <= 0;
+
+
+  nextButton.disabled =
+    currentWordIndex === -1 ||
+    currentWordIndex >=
+      filteredVocabulary.length - 1;
+
+}
+
+
+/* =========================================
+   PREVIOUS WORD
+========================================= */
+
+function openPreviousWord() {
+
+  if (currentWordIndex <= 0) {
+    return;
+  }
+
+
+  currentWordIndex--;
+
+
+  openWord(
+    filteredVocabulary[currentWordIndex]
+  );
+
+}
+
+
+/* =========================================
+   NEXT WORD
+========================================= */
+
+function openNextWord() {
+
+  if (
+    currentWordIndex === -1 ||
+    currentWordIndex >=
+      filteredVocabulary.length - 1
+  ) {
+    return;
+  }
+
+
+  currentWordIndex++;
+
+
+  openWord(
+    filteredVocabulary[currentWordIndex]
+  );
 
 }
 
@@ -1510,13 +1622,19 @@ document
 
   });
 
-  function uploadEditedImage() {
+  /* =========================================
+   UPDATE EDITED IMAGE
+========================================= */
+
+function uploadEditedImage() {
 
   const fileInput =
     document.getElementById('editImageFile');
 
   const word =
-    document.getElementById('editWord').value.trim();
+    document.getElementById('editWord')
+      .value
+      .trim();
 
   if (!word) {
     alert('Please enter the word first.');
@@ -1528,14 +1646,25 @@ document
     return;
   }
 
-  const file = fileInput.files[0];
+  if (!currentWord) {
+    alert('No word selected.');
+    return;
+  }
 
-  const reader = new FileReader();
+
+  const file =
+    fileInput.files[0];
+
+
+  const reader =
+    new FileReader();
+
 
   reader.onload = function(e) {
 
     const base64 =
       e.target.result.split(',')[1];
+
 
     const fileData = {
 
@@ -1550,10 +1679,156 @@ document
 
       .withSuccessHandler(function(result) {
 
-        document.getElementById('editImage').value =
-          result.url;
+        /*
+         * Get only the filename.
+         * Do NOT save the GitHub URL in the Sheet.
+         */
 
-        alert('Image updated successfully.');
+        const imageName =
+          result.fileName ||
+          result.path ||
+          '';
+
+
+        if (!imageName) {
+
+          alert(
+            'Image uploaded, but filename was not returned.'
+          );
+
+          return;
+
+        }
+
+
+        /*
+         * If path contains vocabulary/,
+         * keep only the filename.
+         */
+
+        const cleanImageName =
+          imageName
+            .split('/')
+            .pop();
+
+
+        /*
+         * Show filename in Edit window.
+         */
+
+        document.getElementById('editImage')
+          .value =
+            cleanImageName;
+
+
+        /*
+         * Update image name in current word.
+         */
+
+        currentWord.Image =
+          cleanImageName;
+
+
+        /*
+         * Save the image filename
+         * into the Vocabulary sheet.
+         */
+
+        const updatedWord = {
+
+          ID: currentWord.ID,
+
+          Word:
+            document.getElementById('editWord')
+              .value.trim(),
+
+          Category:
+            document.getElementById('editCategory')
+              .value.trim(),
+
+          Level:
+            document.getElementById('editLevel')
+              .value.trim(),
+
+          Meaning:
+            document.getElementById('editMeaning')
+              .value.trim(),
+
+          Phonics:
+            document.getElementById('editPhonics')
+              .value.trim(),
+
+          IPA:
+            document.getElementById('editIPA')
+              .value.trim(),
+
+          Syllable:
+            document.getElementById('editSyllable')
+              .value.trim(),
+
+          Image:
+            cleanImageName,
+
+          Favorite:
+            currentWord.Favorite || ''
+
+        };
+
+
+        google.script.run
+
+          .withSuccessHandler(function() {
+
+            /*
+             * Update local vocabulary also.
+             */
+
+            const index =
+              vocabulary.findIndex(function(item) {
+
+                return String(item.ID) ===
+                  String(updatedWord.ID);
+
+              });
+
+
+            if (index !== -1) {
+
+              vocabulary[index] =
+                updatedWord;
+
+            }
+
+
+            currentWord =
+              updatedWord;
+
+
+            alert(
+              'Image updated and Sheet updated successfully.'
+            );
+
+
+            /*
+             * Clear file selection
+             */
+
+            fileInput.value = '';
+
+          })
+
+          .withFailureHandler(function(error) {
+
+            alert(
+              error.message ||
+              'Image uploaded but Sheet update failed.'
+            );
+
+          })
+
+          .updateVocabulary(
+            updatedWord
+          );
 
       })
 
@@ -1569,13 +1844,53 @@ document
       .uploadVocabularyImage(
         fileData,
         word,
-        document.getElementById('editCategory').value
+        document.getElementById('editCategory')
+          .value
       );
 
   };
 
 
   reader.readAsDataURL(file);
+
+}
+
+/* =========================================
+   SHUFFLE WORDS
+========================================= */
+
+function shuffleWords() {
+
+  if (!vocabulary || vocabulary.length === 0) {
+    return;
+  }
+
+  // Create a new copy so original vocabulary is not changed
+  filteredVocabulary = [...vocabulary];
+
+  // Fisher-Yates shuffle
+  for (
+    let i = filteredVocabulary.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(Math.random() * (i + 1));
+
+    [
+      filteredVocabulary[i],
+      filteredVocabulary[j]
+    ] =
+    [
+      filteredVocabulary[j],
+      filteredVocabulary[i]
+    ];
+
+  }
+
+  // Show shuffled words
+  renderWords();
 
 }
 

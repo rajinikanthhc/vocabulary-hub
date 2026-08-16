@@ -818,9 +818,10 @@ const path =
 
 
   return {
-  path: path,
 
   fileName: fileName,
+
+  path: path,
 
   url:
     'https://raw.githubusercontent.com/' +
@@ -831,8 +832,8 @@ const path =
     branch +
     '/' +
     path
-};
 
+};
 }
 
 

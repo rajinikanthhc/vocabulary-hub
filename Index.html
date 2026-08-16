@@ -131,6 +131,15 @@
 
 </select>
 
+<button
+  id="shuffleButton"
+  class="favoriteFilter"
+  onclick="shuffleWords()">
+
+  🔀 Shuffle
+
+</button>
+
   </section>
 
 
@@ -232,6 +241,24 @@
 
         </button>
 
+        <div class="wordNavigation">
+
+  <button
+    id="previousWordButton"
+    class="navigationButton"
+    onclick="openPreviousWord()">
+    ← Previous
+  </button>
+
+  <button
+    id="nextWordButton"
+    class="navigationButton"
+    onclick="openNextWord()">
+    Next →
+  </button>
+
+</div>
+
 
         <div class="detailBox">
 
@@ -307,6 +334,27 @@
           onclick="toggleCurrentFavorite()">
 
         </button>
+
+        <div class="wordNavigation">
+
+  <button
+    id="previousWordButton"
+    onclick="openPreviousWord()">
+
+    ← Previous
+
+  </button>
+
+
+  <button
+    id="nextWordButton"
+    onclick="openNextWord()">
+
+    Next →
+
+  </button>
+
+</div>
 
 
       </div>
