@@ -395,6 +395,50 @@ function deleteVocabulary(id) {
     throw new Error('ID column not found.');
   }
 
+    /* =====================================
+     CHECK DUPLICATE WORD
+  ====================================== */
+
+  const wordColumn =
+    headers.indexOf('Word');
+
+  if (wordColumn === -1) {
+
+    throw new Error(
+      'Word column not found.'
+    );
+
+  }
+
+
+  const newWordName =
+    String(word.Word || '')
+      .trim()
+      .toLowerCase();
+
+
+  for (let i = 1; i < data.length; i++) {
+
+    const existingWord =
+      String(data[i][wordColumn] || '')
+        .trim()
+        .toLowerCase();
+
+    if (
+      existingWord &&
+      existingWord === newWordName
+    ) {
+
+      throw new Error(
+        'Word already exists: "' +
+        data[i][wordColumn] +
+        '"'
+      );
+
+    }
+
+  }
+
 
   for (let i = 1; i < data.length; i++) {
 
@@ -860,4 +904,455 @@ function getImageExtension_(mimeType) {
 
   return map[mimeType] || '.png';
 
+}
+
+/* =========================================
+   GET AUTOMATIC WORD DATA
+========================================= */
+
+function getAutomaticWordData(word) {
+
+  word =
+    String(word || '')
+      .trim()
+      .toLowerCase();
+
+  if (!word) {
+    throw new Error('Please enter a word.');
+  }
+
+
+  const url =
+    'https://api.dictionaryapi.dev/api/v2/entries/en/' +
+    encodeURIComponent(word);
+
+
+  const response =
+    UrlFetchApp.fetch(
+      url,
+      {
+        method: 'get',
+        muteHttpExceptions: true
+      }
+    );
+
+
+  const code =
+    response.getResponseCode();
+
+
+  if (code !== 200) {
+
+    throw new Error(
+      'Word pronunciation not found.'
+    );
+
+  }
+
+
+  const data =
+    JSON.parse(
+      response.getContentText()
+    );
+
+
+  /* =====================================
+     FIND CLEAN IPA
+  ====================================== */
+
+  let ipa = '';
+
+
+  for (let i = 0; i < data.length; i++) {
+
+    const phonetics =
+      data[i].phonetics || [];
+
+
+    for (let j = 0; j < phonetics.length; j++) {
+
+      const text =
+        String(
+          phonetics[j].text || ''
+        ).trim();
+
+
+      if (!text) {
+        continue;
+      }
+
+
+      /*
+       * Accept only real IPA symbols.
+       * Ignore strange pronunciation formats.
+       */
+
+      if (
+        /[əɪʊɑɔɛʌɒːˈˌ]/.test(text)
+      ) {
+
+        ipa = text;
+
+        break;
+
+      }
+
+    }
+
+
+    if (ipa) {
+      break;
+    }
+
+  }
+
+
+  /* =====================================
+     CLEAN IPA FORMAT
+  ====================================== */
+
+  if (ipa) {
+
+    ipa =
+      ipa
+        .replace(/^\[/, '')
+        .replace(/\]$/, '')
+        .trim();
+
+  }
+
+
+  /* =====================================
+     SPECIAL COMMON WORD OVERRIDES
+  ====================================== */
+
+  const ipaOverrides = {
+
+    'tomato': '/təˈmeɪtoʊ/',
+    'potato': '/pəˈteɪtoʊ/',
+    'eggplant': '/ˈɛɡ.plænt/',
+    'carrot': '/ˈkærət/',
+    'cabbage': '/ˈkæbɪdʒ/',
+    'helicopter': '/ˈhɛlɪˌkɑːptər/',
+    'rocket': '/ˈrɑːkɪt/',
+    'onion': '/ˈʌnjən/',
+    'train': '/treɪn/',
+    'jeep': '/dʒiːp/',
+    'engine': '/ˈɛndʒɪn/',
+    'firetruck': '/ˈfaɪərtrʌk/',
+    'while': '/waɪl/',
+    'some': '/sʌm/',
+    'how': '/haʊ/',
+    'soon': '/suːn/',
+    'behind': '/bɪˈhaɪnd/',
+    'everyone': '/ˈɛvriwʌn/',
+    'that': '/ðæt/',
+    'which': '/wɪtʃ/',
+    'together': '/təˈɡɛðər/'
+  };
+
+
+  if (
+    Object.prototype.hasOwnProperty
+      .call(ipaOverrides, word)
+  ) {
+
+    ipa =
+      ipaOverrides[word];
+
+  }
+
+
+  /* =====================================
+     GENERATE PHONICS
+  ====================================== */
+
+  const phonics =
+    generatePhonics_(word);
+
+
+  /* =====================================
+     COUNT SYLLABLES
+  ====================================== */
+
+  const syllable =
+    countSyllables_(word);
+
+
+  return {
+
+    phonics: phonics,
+
+    ipa: ipa,
+
+    syllable: syllable
+
+  };
+
+}
+
+/* =========================================
+   SIMPLE PHONICS
+========================================= */
+
+function generatePhonics_(word) {
+
+  word =
+    String(word || '')
+      .toLowerCase()
+      .replace(/[^a-z]/g, '');
+
+
+  if (!word) {
+    return '';
+  }
+
+
+  /*
+   * Common phonics groups
+   */
+
+  const groups = [
+    'tion',
+    'sion',
+    'ture',
+    'ough',
+    'eigh',
+    'igh',
+    'ph',
+    'sh',
+    'ch',
+    'th',
+    'wh',
+    'ck',
+    'ng',
+    'qu',
+    'oo',
+    'ee',
+    'ea',
+    'ai',
+    'ay',
+    'oa',
+    'ow',
+    'ou',
+    'oi',
+    'oy',
+    'ar',
+    'er',
+    'ir',
+    'ur'
+  ];
+
+
+  const result = [];
+
+  let i = 0;
+
+
+  while (i < word.length) {
+
+    let found = '';
+
+
+    for (let j = 0; j < groups.length; j++) {
+
+      const group =
+        groups[j];
+
+
+      if (
+        word.substring(
+          i,
+          i + group.length
+        ) === group
+      ) {
+
+        found = group;
+
+        break;
+
+      }
+
+    }
+
+
+    if (found) {
+
+      result.push(found);
+
+      i += found.length;
+
+    } else {
+
+      result.push(
+        word.charAt(i)
+      );
+
+      i++;
+
+    }
+
+  }
+
+
+  return result.join('-');
+
+}
+
+
+/* =========================================
+   SYLLABLE COUNT
+========================================= */
+
+function countSyllables_(word) {
+
+  word =
+    String(word || '')
+      .toLowerCase()
+      .replace(/[^a-z]/g, '');
+
+
+  if (!word) {
+    return '';
+  }
+
+
+  /*
+   * Some common exceptions
+   */
+
+  const exceptions = {
+
+    'potato': 3,
+    'tomato': 3,
+    'eggplant': 2,
+    'carrot': 2,
+    'cabbage': 2,
+    'helicopter': 4,
+    'rocket': 2,
+    'vegetable': 4,
+    'beautiful': 3,
+    'family': 3,
+    'every': 3,
+    'everyone': 4
+
+  };
+
+
+  if (exceptions[word]) {
+
+    return exceptions[word];
+
+  }
+
+
+  /*
+   * Basic vowel-group method
+   */
+
+  let count = 0;
+
+  const vowelGroups =
+    word.match(/[aeiouy]+/g);
+
+
+  if (vowelGroups) {
+
+    count =
+      vowelGroups.length;
+
+  }
+
+
+  /*
+   * Silent final e
+   */
+
+  if (
+    word.endsWith('e') &&
+    count > 1 &&
+    !word.endsWith('le')
+  ) {
+
+    count--;
+
+  }
+
+
+  /*
+   * Words ending in consonant + le
+   */
+
+  if (
+    word.endsWith('le') &&
+    word.length > 2 &&
+    !/[aeiou]le$/.test(word)
+  ) {
+
+    count++;
+
+  }
+
+
+  return Math.max(1, count);
+
+}
+
+/* =========================================
+   CHECK DUPLICATE WORD
+========================================= */
+
+function checkDuplicateWord(word) {
+
+  const ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+  const sheet =
+    ss.getSheetByName('Vocabulary');
+
+  if (!sheet) {
+    throw new Error('Vocabulary sheet not found.');
+  }
+
+  const data =
+    sheet.getDataRange().getDisplayValues();
+
+  if (data.length <= 1) {
+    return false;
+  }
+
+  const headers =
+    data[0].map(function(header) {
+      return String(header).trim();
+    });
+
+  const wordColumn =
+    headers.indexOf('Word');
+
+  if (wordColumn === -1) {
+    throw new Error('Word column not found.');
+  }
+
+  const searchWord =
+    String(word || '')
+      .trim()
+      .toLowerCase();
+
+  if (!searchWord) {
+    return false;
+  }
+
+  for (let i = 1; i < data.length; i++) {
+
+    const existingWord =
+      String(data[i][wordColumn] || '')
+        .trim()
+        .toLowerCase();
+
+    if (existingWord === searchWord) {
+      return true;
+    }
+  }
+
+  return false;
 }

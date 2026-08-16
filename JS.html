@@ -1417,6 +1417,29 @@ function saveNewWord() {
     return;
   }
 
+    // Check for duplicate word
+  const duplicate =
+    vocabulary.some(function(item) {
+
+      return String(item.Word || '')
+        .trim()
+        .toLowerCase() === word.toLowerCase();
+
+    });
+
+  if (duplicate) {
+
+    alert(
+      'Word already exists: "' +
+      word +
+      '"'
+    );
+
+    document.getElementById('addWord').focus();
+
+    return;
+  }
+
 
   if (!category) {
     alert('Please select a category.');
@@ -1912,6 +1935,73 @@ function speakWord(word) {
   speech.rate = 0.85;
 
   window.speechSynthesis.speak(speech);
+
+}
+
+/* =========================================
+   AUTO FILL WORD DATA
+========================================= */
+
+function autoFillWordData() {
+
+  const wordInput =
+    document.getElementById('addWord');
+
+  const word =
+    wordInput.value.trim();
+
+  if (!word) {
+
+    alert('Please enter the word first.');
+
+    wordInput.focus();
+
+    return;
+  }
+
+
+  const button =
+    document.querySelector('.autoFillButton');
+
+  button.disabled = true;
+
+  button.textContent = '⏳ Loading...';
+
+
+  google.script.run
+
+    .withSuccessHandler(function (result) {
+
+      document.getElementById('addPhonics').value =
+        result.phonics || '';
+
+      document.getElementById('addIPA').value =
+        result.ipa || '';
+
+      document.getElementById('addSyllable').value =
+        result.syllable || '';
+
+
+      button.disabled = false;
+
+      button.textContent = '✨ Auto Fill';
+
+    })
+
+    .withFailureHandler(function (error) {
+
+      button.disabled = false;
+
+      button.textContent = '✨ Auto Fill';
+
+      alert(
+        'Could not get word information.\n\n' +
+        error.message
+      );
+
+    })
+
+    .getAutomaticWordData(word);
 
 }
 
