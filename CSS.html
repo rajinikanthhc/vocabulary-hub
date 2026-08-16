@@ -1,0 +1,1108 @@
+<style>
+
+/* =========================================
+   BASIC
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+
+  margin: 0;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  background: #f5f7f9;
+
+  color: #263238;
+
+}
+
+
+button,
+input,
+select {
+
+  font-family: inherit;
+
+}
+
+
+/* =========================================
+   APP
+========================================= */
+
+.app {
+
+  min-height: 100vh;
+
+}
+
+
+/* =========================================
+   TOPBAR
+========================================= */
+
+.topbar {
+
+  background: #176b63;
+
+  color: white;
+
+  padding: 18px 24px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,0.12);
+
+}
+
+.topbar h1 {
+
+  margin: 0;
+
+  font-size: 24px;
+
+}
+
+.subtitle {
+
+  margin-top: 4px;
+
+  font-size: 13px;
+
+  opacity: 0.85;
+
+}
+
+
+/* =========================================
+   SEARCH
+========================================= */
+
+.searchSection {
+
+  padding: 20px 20px 10px;
+
+  max-width: 1100px;
+
+  margin: auto;
+
+}
+
+.searchBox {
+
+  position: relative;
+
+  background: white;
+
+  border: 1px solid #d9dfe3;
+
+  border-radius: 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  box-shadow:
+    0 2px 6px
+    rgba(0,0,0,0.05);
+
+}
+
+.searchIcon {
+
+  padding-left: 14px;
+
+  font-size: 18px;
+
+}
+
+.searchBox input {
+
+  flex: 1;
+
+  border: none;
+
+  outline: none;
+
+  padding: 14px;
+
+  font-size: 16px;
+
+  background: transparent;
+
+}
+
+.clearButton {
+
+  border: none;
+
+  background: none;
+
+  font-size: 25px;
+
+  cursor: pointer;
+
+  padding: 5px 14px;
+
+  color: #777;
+
+}
+
+
+/* =========================================
+   FILTERS
+========================================= */
+
+.filters {
+
+  max-width: 1100px;
+
+  margin: auto;
+
+  padding: 10px 20px;
+
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+
+}
+
+.filters select {
+
+  padding: 10px 12px;
+
+  border-radius: 9px;
+
+  border: 1px solid #ccd4d8;
+
+  background: white;
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+}
+
+.favoriteFilter {
+
+  padding: 10px 14px;
+
+  border-radius: 9px;
+
+  border: 1px solid #ccd4d8;
+
+  background: white;
+
+  cursor: pointer;
+
+}
+
+.favoriteFilter.active {
+
+  background: #fff3cd;
+
+  border-color: #e6c95c;
+
+}
+
+
+/* =========================================
+   RESULT BAR
+========================================= */
+
+.resultBar {
+
+  max-width: 1100px;
+
+  margin: auto;
+
+  padding: 5px 20px 12px;
+
+  color: #68757d;
+
+  font-size: 13px;
+
+}
+
+
+/* =========================================
+   WORD LIST
+========================================= */
+
+.wordList {
+
+  max-width: 1100px;
+
+  margin: auto;
+
+  padding: 0 20px 30px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fill, minmax(250px, 1fr));
+
+  gap: 14px;
+
+}
+
+
+/* =========================================
+   WORD CARD
+========================================= */
+
+.wordCard {
+
+  background: white;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  border: 1px solid #e0e5e8;
+
+  cursor: pointer;
+
+  transition:
+    transform .15s,
+    box-shadow .15s;
+
+}
+
+.wordCard:hover {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 5px 16px
+    rgba(0,0,0,0.10);
+
+}
+
+
+.cardImage {
+
+  height: 150px;
+
+  background: #eef3f2;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  overflow: hidden;
+
+}
+
+.cardImage img {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: contain;
+
+}
+
+.noImage {
+
+  font-size: 48px;
+
+}
+
+
+.cardBody {
+
+  padding: 15px;
+
+}
+
+.cardTop {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  gap: 10px;
+
+}
+
+.word {
+
+  font-size: 23px;
+
+  font-weight: bold;
+
+  color: #176b63;
+
+}
+
+.favoriteButton {
+
+  border: none;
+
+  background: transparent;
+
+  font-size: 23px;
+
+  color: #aeb6ba;
+
+  cursor: pointer;
+
+  padding: 2px 5px;
+
+  line-height: 1;
+
+}
+
+.favoriteButton:hover {
+
+  transform: scale(1.15);
+
+  color: #e1b400;
+
+}
+
+.favoriteButton.active {
+
+  color: #e1b400;
+
+}
+
+.favoriteButton:disabled {
+
+  cursor: wait;
+
+  opacity: 0.6;
+
+}
+
+.category {
+
+  font-size: 12px;
+
+  color: #68757d;
+
+  margin-top: 4px;
+
+}
+
+.meaning {
+
+  margin-top: 10px;
+
+  line-height: 1.4;
+
+  font-size: 14px;
+
+}
+
+.cardMeta {
+
+  margin-top: 12px;
+
+  display: flex;
+
+  gap: 6px;
+
+  flex-wrap: wrap;
+
+}
+
+.tag {
+
+  background: #edf5f4;
+
+  color: #176b63;
+
+  padding: 4px 8px;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+
+}
+
+
+/* =========================================
+   NO RESULTS
+========================================= */
+
+.noResults {
+
+  text-align: center;
+
+  padding: 60px 20px;
+
+  color: #68757d;
+
+}
+
+.noResultsIcon {
+
+  font-size: 50px;
+
+}
+
+
+/* =========================================
+   MODAL
+========================================= */
+
+.modal {
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1000;
+
+}
+
+
+.modalOverlay {
+
+  position: absolute;
+
+  inset: 0;
+
+  background: rgba(0,0,0,0.5);
+
+}
+
+
+.modalCard {
+
+  position: relative;
+
+  width: min(92%, 850px);
+
+  max-height: 90vh;
+
+  margin: 5vh auto;
+
+  background: white;
+
+  border-radius: 18px;
+
+  z-index: 2;
+
+  box-shadow:
+    0 15px 50px
+    rgba(0,0,0,0.25);
+
+  overflow: hidden;
+
+  display: grid;
+
+  grid-template-columns: 42% 58%;
+
+}
+
+
+/* =========================================
+   CLOSE BUTTON
+========================================= */
+
+.closeButton {
+
+  position: absolute;
+
+  right: 12px;
+
+  top: 10px;
+
+  z-index: 10;
+
+  border: none;
+
+  background: white;
+
+  width: 38px;
+
+  height: 38px;
+
+  border-radius: 50%;
+
+  font-size: 27px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,0.15);
+
+}
+
+
+/* =========================================
+   LEFT IMAGE
+========================================= */
+
+.modalImage {
+
+  height: 100%;
+
+  min-height: 500px;
+
+  background: #eef3f2;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  overflow: hidden;
+
+}
+
+
+.modalImage img {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: contain;
+
+}
+
+
+.modalImage .noImage {
+
+  font-size: 60px;
+
+}
+
+
+/* =========================================
+   RIGHT CONTENT
+========================================= */
+
+.modalContent {
+
+  padding: 30px;
+
+  overflow-y: auto;
+
+  max-height: 90vh;
+
+}
+
+
+.modalCategory {
+
+  font-size: 13px;
+
+  color: #176b63;
+
+  font-weight: bold;
+
+}
+
+
+.modalContent h2 {
+
+  font-size: 38px;
+
+  margin: 5px 0 12px;
+
+}
+
+
+.speakButton {
+
+  border: none;
+
+  background: #176b63;
+
+  color: white;
+
+  padding: 10px 16px;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  margin-bottom: 18px;
+
+}
+
+
+.detailBox {
+
+  background: #f5f7f9;
+
+  border-radius: 10px;
+
+  padding: 14px;
+
+}
+
+
+.detailLabel {
+
+  font-size: 11px;
+
+  color: #718087;
+
+  text-transform: uppercase;
+
+  letter-spacing: .5px;
+
+  margin-bottom: 5px;
+
+}
+
+
+.detailValue {
+
+  line-height: 1.5;
+
+}
+
+
+.detailGrid {
+
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 10px;
+
+  margin-top: 12px;
+
+}
+
+
+.smallDetail {
+
+  background: #f5f7f9;
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+}
+
+
+.modalFavorite {
+
+  width: 100%;
+
+  margin-top: 15px;
+
+  padding: 12px;
+
+  border: 1px solid #d8dee1;
+
+  background: white;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .topbar {
+    padding: 15px;
+  }
+
+  .topbar h1 {
+    font-size: 21px;
+  }
+
+  .searchSection {
+    padding: 14px 12px 8px;
+  }
+
+  .filters {
+    padding: 8px 12px;
+  }
+
+  .filters select,
+  .favoriteFilter {
+    flex: 1;
+  }
+
+  .wordList {
+    padding: 0 12px 25px;
+    grid-template-columns: 1fr;
+  }
+
+  .cardImage {
+    height: 180px;
+  }
+
+
+  /* Mobile word popup */
+
+  .modalCard {
+
+    width: 95%;
+
+    max-height: 92vh;
+
+    margin: 4vh auto;
+
+    display: flex;
+
+    flex-direction: column;
+
+  }
+
+
+  .modalImage {
+
+    height: 230px;
+
+    min-height: 230px;
+
+    flex-shrink: 0;
+
+  }
+
+
+  .modalContent {
+
+    padding: 20px;
+
+    max-height: none;
+
+    overflow-y: visible;
+
+  }
+
+
+  .modalContent h2 {
+
+    font-size: 32px;
+
+  }
+
+
+  .detailGrid {
+
+    grid-template-columns: 1fr 1fr;
+
+  }
+
+}
+
+.editButtons {
+
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 12px;
+
+}
+
+.editButtons button {
+
+  flex: 1;
+
+}
+
+.deleteEditButton {
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background: #c62828;
+
+  color: white;
+
+  font-size: 15px;
+
+  cursor: pointer;
+
+}
+
+/* =========================================
+   EDIT WORD WINDOW
+========================================= */
+
+.editCard {
+  width: 560px;
+  max-width: 92vw;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.editForm label {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 2px;
+
+  font-size: 13px;
+  font-weight: 600;
+  color: #526067;
+}
+
+.editForm input,
+.editForm textarea {
+  display: block;
+  box-sizing: border-box;
+
+  width: 100%;
+
+  padding: 9px 10px;
+
+  border: 1px solid #ccd5d9;
+  border-radius: 7px;
+
+  background: white;
+
+  font-size: 14px;
+  color: #263238;
+
+  outline: none;
+}
+
+.editForm input:focus,
+.editForm textarea:focus {
+  border-color: #176b63;
+}
+
+.editForm textarea {
+  min-height: 75px;
+  resize: vertical;
+}
+
+
+/* =========================================
+   EDIT BUTTONS
+========================================= */
+
+.editButtons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.editButtons button {
+  flex: 1;
+  min-height: 42px;
+
+  border: none;
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+
+/* SAVE */
+
+.saveEditButton {
+  background: #176b63;
+  color: white;
+}
+
+.saveEditButton:hover {
+  opacity: 0.9;
+}
+
+
+/* DELETE */
+
+.deleteEditButton {
+  background: #c62828;
+  color: white;
+}
+
+.deleteEditButton:hover {
+  opacity: 0.9;
+}
+
+/* =========================================
+   EDIT WORD MODAL
+========================================= */
+
+.editCard {
+  width: 560px;
+  max-width: 92vw;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.editCard .modalContent {
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 5px 10px 20px 5px;
+}
+
+
+/* Form */
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editForm label {
+  display: block;
+
+  margin-top: 5px;
+  margin-bottom: 1px;
+
+  font-size: 13px;
+  font-weight: 600;
+  color: #526067;
+}
+
+.editForm input,
+.editForm textarea {
+  display: block;
+  box-sizing: border-box;
+
+  width: 100%;
+
+  padding: 8px 10px;
+
+  border: 1px solid #ccd5d9;
+  border-radius: 7px;
+
+  background: white;
+
+  font-size: 14px;
+  color: #263238;
+
+  outline: none;
+}
+
+.editForm textarea {
+  min-height: 65px;
+  resize: vertical;
+}
+
+
+/* Buttons */
+
+.editButtons {
+  display: flex;
+  gap: 10px;
+
+  width: 100%;
+
+  margin-top: 14px;
+  padding-top: 5px;
+}
+
+.editButtons button {
+  flex: 1;
+
+  min-height: 42px;
+
+  border: none;
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+
+.saveEditButton {
+  background: #176b63;
+  color: white;
+}
+
+
+.deleteEditButton {
+  background: #c62828;
+  color: white;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+  .editCard {
+    width: 92vw;
+    max-height: 90vh;
+  }
+
+  .editButtons {
+    flex-direction: column;
+  }
+
+}
+
+/* =========================================
+   ADD WORD BUTTON
+========================================= */
+
+.addWordButton {
+
+  border: 1px solid rgba(255,255,255,0.6);
+
+  background: transparent;
+
+  color: white;
+
+  padding: 9px 14px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+}
+
+.addWordButton:hover {
+
+  background: rgba(255,255,255,0.12);
+
+}
+
+
+.addSaveButton {
+
+  width: 100%;
+
+  margin-top: 14px;
+
+  min-height: 42px;
+
+}
+
+</style>

@@ -1,0 +1,1603 @@
+<script>
+
+let vocabulary = [];
+let filteredVocabulary = [];
+let currentWord = null;
+let favoriteOnly = false;
+
+
+/* =========================================
+   START
+========================================= */
+
+window.addEventListener('load', function () {
+
+  loadVocabulary();
+
+});
+
+
+/* =========================================
+   LOAD VOCABULARY
+========================================= */
+
+/* =========================================
+   LOAD VOCABULARY
+========================================= */
+
+function loadVocabulary() {
+
+  google.script.run
+
+    .withSuccessHandler(function (data) {
+
+      vocabulary = data || [];
+
+      // Build category and level filters
+      populateFilters();
+
+      // Apply default sorting + filters
+      applyFilters();
+
+    })
+
+    .withFailureHandler(function (error) {
+
+      console.error(error);
+
+      document.getElementById('resultCount')
+        .textContent = 'Error loading vocabulary';
+
+      alert(
+        error.message ||
+        'Unable to load vocabulary.'
+      );
+
+    })
+
+    .getVocabulary();
+
+}
+
+/* =========================================
+   POPULATE CATEGORY & LEVEL FILTERS
+========================================= */
+
+function populateFilters() {
+
+  const categoryFilter =
+    document.getElementById('categoryFilter');
+
+  const levelFilter =
+    document.getElementById('levelFilter');
+
+
+  const categories = [];
+
+  const levels = [];
+
+
+  vocabulary.forEach(function (word) {
+
+    const category =
+      String(word.Category || '').trim();
+
+    const level =
+      String(word.Level || '').trim();
+
+
+    if (
+      category &&
+      !categories.includes(category)
+    ) {
+      categories.push(category);
+    }
+
+
+    if (
+      level &&
+      !levels.includes(level)
+    ) {
+      levels.push(level);
+    }
+
+  });
+
+
+  categories.sort();
+
+  levels.sort();
+
+
+  // Clear existing options
+  categoryFilter.innerHTML =
+    '<option value="">All Categories</option>';
+
+  levelFilter.innerHTML =
+    '<option value="">All Levels</option>';
+
+
+  // Add categories
+  categories.forEach(function (category) {
+
+    const option =
+      document.createElement('option');
+
+    option.value = category;
+
+    option.textContent = category;
+
+    categoryFilter.appendChild(option);
+
+  });
+
+
+  // Add levels
+  levels.forEach(function (level) {
+
+    const option =
+      document.createElement('option');
+
+    option.value = level;
+
+    option.textContent = level;
+
+    levelFilter.appendChild(option);
+
+  });
+
+}
+
+
+/* =========================================
+   APPLY FILTERS
+========================================= */
+
+function applyFilters() {
+
+  const search =
+    document.getElementById('searchInput')
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  const category =
+    document.getElementById('categoryFilter')
+      .value;
+
+
+  const level =
+    document.getElementById('levelFilter')
+      .value;
+
+
+  const sortValue =
+    document.getElementById('sortFilter')
+      .value;
+
+
+  /* =========================================
+     FILTER
+  ========================================= */
+
+  filteredVocabulary =
+    vocabulary.filter(function (word) {
+
+      const wordText =
+        String(word.Word || '')
+          .toLowerCase();
+
+
+      const meaning =
+        String(word.Meaning || '')
+          .toLowerCase();
+
+
+      const phonics =
+        String(word.Phonics || '')
+          .toLowerCase();
+
+
+      const categoryText =
+        String(word.Category || '')
+          .trim();
+
+
+      const levelText =
+        String(word.Level || '')
+          .trim();
+
+
+      const searchMatch =
+        !search ||
+        wordText.includes(search) ||
+        meaning.includes(search) ||
+        phonics.includes(search);
+
+
+      const categoryMatch =
+        !category ||
+        categoryText === category;
+
+
+      const levelMatch =
+        !level ||
+        levelText === level;
+
+
+      const favoriteMatch =
+        !favoriteOnly ||
+        isFavorite(word);
+
+
+      return (
+        searchMatch &&
+        categoryMatch &&
+        levelMatch &&
+        favoriteMatch
+      );
+
+    });
+
+
+  /* =========================================
+     SORT
+  ========================================= */
+
+  if (sortValue === 'az') {
+
+    filteredVocabulary.sort(function (a, b) {
+
+      return String(a.Word || '')
+        .localeCompare(
+          String(b.Word || ''),
+          undefined,
+          {
+            sensitivity: 'base'
+          }
+        );
+
+    });
+
+  }
+
+
+  else if (sortValue === 'za') {
+
+    filteredVocabulary.sort(function (a, b) {
+
+      return String(b.Word || '')
+        .localeCompare(
+          String(a.Word || ''),
+          undefined,
+          {
+            sensitivity: 'base'
+          }
+        );
+
+    });
+
+  }
+
+
+  else if (sortValue === 'newest') {
+
+    filteredVocabulary.sort(function (a, b) {
+
+      return Number(b.ID || 0) -
+             Number(a.ID || 0);
+
+    });
+
+  }
+
+
+  else if (sortValue === 'oldest') {
+
+    filteredVocabulary.sort(function (a, b) {
+
+      return Number(a.ID || 0) -
+             Number(b.ID || 0);
+
+    });
+
+  }
+
+
+  /* =========================================
+     DISPLAY
+  ========================================= */
+
+  renderWords();
+
+
+  document.getElementById('clearSearch')
+    .style.display =
+      search ? 'block' : 'none';
+
+}
+
+
+/* =========================================
+   FAVORITE FILTER
+========================================= */
+
+function toggleFavoriteFilter() {
+
+  favoriteOnly = !favoriteOnly;
+
+
+  const button =
+    document.getElementById(
+      'favoriteFilter'
+    );
+
+
+  if (favoriteOnly) {
+
+    button.classList.add('active');
+
+    button.textContent =
+      '★ Favorites';
+
+  } else {
+
+    button.classList.remove('active');
+
+    button.textContent =
+      '☆ Favorites';
+
+  }
+
+
+  applyFilters();
+
+}
+
+
+/* =========================================
+   CHECK FAVORITE
+========================================= */
+
+function isFavorite(word) {
+
+  return String(word.Favorite || '')
+    .toLowerCase() === 'yes';
+
+}
+
+
+/* =========================================
+   RENDER WORDS
+========================================= */
+
+function renderWords() {
+
+  const list =
+    document.getElementById('wordList');
+
+  const empty =
+    document.getElementById('noResults');
+
+  const count =
+    document.getElementById('resultCount');
+
+  list.innerHTML = '';
+
+
+  /* =========================================
+     RESULT COUNT
+  ========================================= */
+
+  count.textContent =
+    filteredVocabulary.length +
+    (
+      filteredVocabulary.length === 1
+        ? ' word'
+        : ' words'
+    );
+
+
+  /* =========================================
+     NO RESULTS
+  ========================================= */
+
+  if (filteredVocabulary.length === 0) {
+
+    empty.style.display = 'block';
+
+    return;
+
+  }
+
+
+  empty.style.display = 'none';
+
+
+  /* =========================================
+     CREATE WORD CARDS
+  ========================================= */
+
+  filteredVocabulary.forEach(function (word) {
+
+    const card =
+      document.createElement('div');
+
+    card.className = 'wordCard';
+
+
+    const favorite =
+      isFavorite(word);
+
+
+    card.innerHTML =
+
+      '<div class="cardBody">' +
+
+
+        /* =================================
+           CARD TOP
+        ================================= */
+
+        '<div class="cardTop">' +
+
+          '<div class="word">' +
+            escapeHtml(word.Word) +
+          '</div>' +
+
+
+          '<div class="cardActions">' +
+
+
+            /* FAVORITE */
+
+            '<button class="favoriteButton ' +
+              (favorite ? 'active' : '') +
+              '" title="' +
+              (
+                favorite
+                  ? 'Remove from Favorites'
+                  : 'Add to Favorites'
+              ) +
+              '">' +
+
+              (
+                favorite
+                  ? '★'
+                  : '☆'
+              ) +
+
+            '</button>' +
+
+
+            /* EDIT */
+
+            '<button class="editButton" ' +
+              'title="Edit">✏️</button>' +
+
+
+          '</div>' +
+
+        '</div>' +
+
+
+        /* =================================
+           CATEGORY
+        ================================= */
+
+        '<div class="category">' +
+          escapeHtml(word.Category || '') +
+        '</div>' +
+
+
+        /* =================================
+           MEANING
+        ================================= */
+
+        '<div class="meaning">' +
+          escapeHtml(word.Meaning || '') +
+        '</div>' +
+
+
+        /* =================================
+           PHONICS / IPA / SYLLABLE / SOUND
+        ================================= */
+
+        '<div class="cardMeta">' +
+
+
+          '<span class="tag">' +
+            escapeHtml(word.Phonics || '-') +
+          '</span>' +
+
+
+          '<span class="tag">' +
+            escapeHtml(word.IPA || '-') +
+          '</span>' +
+
+
+          '<span class="tag">' +
+  escapeHtml(word.Syllable || '-') +
+'</span>' +
+
+          '<button class="soundButton" ' +
+            'title="Hear Word">🔊</button>' +
+
+
+        '</div>' +
+
+
+      '</div>';
+
+
+    /* =========================================
+       OPEN WORD
+    ========================================= */
+
+    card.addEventListener(
+      'click',
+      function () {
+
+        openWord(word);
+
+      }
+    );
+
+
+    /* =========================================
+       FAVORITE
+    ========================================= */
+
+    const star =
+      card.querySelector('.favoriteButton');
+
+
+    star.addEventListener(
+      'click',
+      function (event) {
+
+        event.stopPropagation();
+
+        toggleHomeFavorite(
+          word,
+          star
+        );
+
+      }
+    );
+
+
+    /* =========================================
+       EDIT
+    ========================================= */
+
+    const editButton =
+      card.querySelector('.editButton');
+
+
+    editButton.addEventListener(
+      'click',
+      function (event) {
+
+        event.stopPropagation();
+
+        openEdit(word);
+
+      }
+    );
+
+
+    /* =========================================
+       SOUND
+    ========================================= */
+
+    const soundButton =
+      card.querySelector('.soundButton');
+
+
+    soundButton.addEventListener(
+      'click',
+      function (event) {
+
+        event.stopPropagation();
+
+        speakWord(word.Word);
+
+      }
+    );
+
+
+    /* =========================================
+       ADD CARD TO LIST
+    ========================================= */
+
+    list.appendChild(card);
+
+  });
+
+}
+
+function toggleHomeFavorite(word, star) {
+
+  const newValue =
+    !isFavorite(word);
+
+
+  // Prevent multiple clicks while saving
+  star.disabled = true;
+
+
+  google.script.run
+
+    .withSuccessHandler(function () {
+
+      // Update current word
+      word.Favorite =
+        newValue ? 'Yes' : '';
+
+
+      // Update main vocabulary array
+      vocabulary.forEach(function (item) {
+
+        if (
+          String(item.ID) ===
+          String(word.ID)
+        ) {
+
+          item.Favorite =
+            newValue ? 'Yes' : '';
+
+        }
+
+      });
+
+
+      // Update star immediately
+      if (newValue) {
+
+        star.textContent = '★';
+
+        star.classList.add('active');
+
+        star.title =
+          'Remove from Favorites';
+
+      } else {
+
+        star.textContent = '☆';
+
+        star.classList.remove('active');
+
+        star.title =
+          'Add to Favorites';
+
+      }
+
+
+      star.disabled = false;
+
+
+      // If Favorites filter is active,
+      // refresh the list so removed words disappear.
+      if (favoriteOnly) {
+
+        applyFilters();
+
+      }
+
+    })
+
+    .withFailureHandler(function (error) {
+
+      star.disabled = false;
+
+      alert(
+        error.message ||
+        'Unable to update favorite.'
+      );
+
+    })
+
+    .updateFavorite(
+      word.ID,
+      newValue
+    );
+
+}
+
+/* =========================================
+   OPEN WORD
+========================================= */
+
+function openWord(word) {
+
+  currentWord = word;
+
+
+  document.getElementById('modalCategory')
+    .textContent =
+      word.Category || '';
+
+
+  document.getElementById('modalWord')
+    .textContent =
+      word.Word || '';
+
+
+  /* =========================================
+     LOAD GITHUB IMAGE
+  ========================================= */
+
+  const imageBox =
+    document.getElementById('modalImage');
+
+  imageBox.innerHTML = '';
+
+
+  if (word.Image) {
+
+    const image =
+      document.createElement('img');
+
+    image.src =
+      'https://raw.githubusercontent.com/' +
+      'rajinikanthhc/images/main/vocabulary/' +
+      encodeURIComponent(word.Image);
+
+
+    image.alt =
+      word.Word || 'Vocabulary image';
+
+
+    image.onerror = function () {
+
+      imageBox.innerHTML = '';
+
+    };
+
+
+    imageBox.appendChild(image);
+
+  }
+
+
+  document.getElementById('modalMeaning')
+    .textContent =
+      word.Meaning || '';
+
+
+  document.getElementById('modalPhonics')
+    .textContent =
+      word.Phonics || '-';
+
+
+  document.getElementById('modalIPA')
+    .textContent =
+      word.IPA || '-';
+
+
+  document.getElementById('modalSyllable')
+    .textContent =
+      word.Syllable || '-';
+
+
+  document.getElementById('modalLevel')
+    .textContent =
+      word.Level || '-';
+
+
+  updateModalFavorite();
+
+
+  document.getElementById('wordModal')
+    .style.display = 'block';
+
+
+  document.body.style.overflow =
+    'hidden';
+
+}
+
+/* =========================================
+   CLOSE WORD
+========================================= */
+
+function closeWord() {
+
+  document.getElementById('wordModal')
+    .style.display = 'none';
+
+
+  document.body.style.overflow = '';
+
+
+  currentWord = null;
+
+}
+
+
+/* =========================================
+   SPEAK
+========================================= */
+
+function speakCurrentWord() {
+
+  if (!currentWord) return;
+
+
+  const speech =
+    new SpeechSynthesisUtterance(
+      currentWord.Word
+    );
+
+
+  speech.lang = 'en-US';
+
+  speech.rate = 0.8;
+
+
+  window.speechSynthesis.cancel();
+
+  window.speechSynthesis.speak(
+    speech
+  );
+
+}
+
+
+/* =========================================
+   FAVORITE
+========================================= */
+
+function toggleCurrentFavorite() {
+
+  if (!currentWord) return;
+
+
+  const newValue =
+    !isFavorite(currentWord);
+
+
+  google.script.run
+
+    .withSuccessHandler(function () {
+
+      currentWord.Favorite =
+        newValue ? 'Yes' : '';
+
+
+      vocabulary.forEach(
+        function (item) {
+
+          if (
+            String(item.ID) ===
+            String(currentWord.ID)
+          ) {
+
+            item.Favorite =
+              newValue ? 'Yes' : '';
+
+          }
+
+        }
+      );
+
+
+      updateModalFavorite();
+
+      applyFilters();
+
+    })
+
+    .withFailureHandler(function (error) {
+
+      alert(
+        error.message ||
+        'Unable to update favorite.'
+      );
+
+    })
+
+    .updateFavorite(
+      currentWord.ID,
+      newValue
+    );
+
+}
+
+
+/* =========================================
+   MODAL FAVORITE BUTTON
+========================================= */
+
+function updateModalFavorite() {
+
+  const button =
+    document.getElementById(
+      'modalFavorite'
+    );
+
+
+  if (!currentWord) return;
+
+
+  if (isFavorite(currentWord)) {
+
+    button.textContent =
+      '★ Remove from Favorites';
+
+  } else {
+
+    button.textContent =
+      '☆ Add to Favorites';
+
+  }
+
+}
+
+
+/* =========================================
+   CLEAR SEARCH
+========================================= */
+
+function clearSearch() {
+
+  document.getElementById('searchInput')
+    .value = '';
+
+
+  document.getElementById('clearSearch')
+    .style.display = 'none';
+
+
+  applyFilters();
+
+}
+
+
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHtml(value) {
+
+  return String(value || '')
+
+    .replace(/&/g, '&amp;')
+
+    .replace(/</g, '&lt;')
+
+    .replace(/>/g, '&gt;')
+
+    .replace(/"/g, '&quot;')
+
+    .replace(/'/g, '&#039;');
+
+}
+
+/* =========================================
+   OPEN EDIT
+========================================= */
+
+function openEdit(word) {
+
+  currentWord = word;
+
+
+  document.getElementById('editWord').value =
+    word.Word || '';
+
+  document.getElementById('editCategory').value =
+    word.Category || '';
+
+  document.getElementById('editLevel').value =
+    word.Level || '';
+
+  document.getElementById('editMeaning').value =
+    word.Meaning || '';
+
+  document.getElementById('editPhonics').value =
+    word.Phonics || '';
+
+  document.getElementById('editIPA').value =
+    word.IPA || '';
+
+  document.getElementById('editSyllable').value =
+    word.Syllable || '';
+
+  document.getElementById('editImage').value =
+    word.Image || '';
+
+  document.getElementById('editImageFile').value = '';
+
+document.getElementById('editImagePreview').innerHTML = '';
+
+if (word.Image) {
+
+  const img =
+    document.createElement('img');
+
+  img.src =
+    'https://raw.githubusercontent.com/' +
+    'rajinikanthhc/images/main/vocabulary/' +
+    encodeURIComponent(word.Image);
+
+  img.onerror = function () {
+    this.style.display = 'none';
+  };
+
+  document
+    .getElementById('editImagePreview')
+    .appendChild(img);
+
+}
+
+  document.getElementById('editModal')
+    .style.display = 'block';
+
+  document.body.style.overflow = 'hidden';
+
+}
+
+
+/* =========================================
+   CLOSE EDIT
+========================================= */
+
+function closeEdit() {
+
+  document.getElementById('editModal')
+    .style.display = 'none';
+
+  document.body.style.overflow = '';
+
+}
+
+
+/* =========================================
+   SAVE EDITED WORD
+========================================= */
+
+function saveEditedWord() {
+
+  if (!currentWord) return;
+
+
+  const updatedWord = {
+
+    ID: currentWord.ID,
+
+    Word:
+      document.getElementById('editWord')
+        .value.trim(),
+
+    Category:
+      document.getElementById('editCategory')
+        .value.trim(),
+
+    Level:
+      document.getElementById('editLevel')
+        .value.trim(),
+
+    Meaning:
+      document.getElementById('editMeaning')
+        .value.trim(),
+
+    Phonics:
+      document.getElementById('editPhonics')
+        .value.trim(),
+
+    IPA:
+      document.getElementById('editIPA')
+        .value.trim(),
+
+    Syllable:
+      document.getElementById('editSyllable')
+        .value.trim(),
+
+    Image:
+      document.getElementById('editImage')
+        .value.trim(),
+
+    Favorite:
+      currentWord.Favorite || ''
+
+  };
+
+
+  google.script.run
+
+    .withSuccessHandler(function () {
+
+      const index =
+        vocabulary.findIndex(function (item) {
+
+          return String(item.ID) ===
+            String(updatedWord.ID);
+
+        });
+
+
+      if (index !== -1) {
+
+        vocabulary[index] =
+          updatedWord;
+
+      }
+
+
+      closeEdit();
+
+      applyFilters();
+
+    })
+
+    .withFailureHandler(function (error) {
+
+      alert(
+        error.message ||
+        'Unable to save changes.'
+      );
+
+    })
+
+    .updateVocabulary(
+      updatedWord
+    );
+
+}
+
+/* =========================================
+   OPEN ADD WORD
+========================================= */
+
+function openAddWord() {
+
+  const modal = document.getElementById('addWordModal');
+
+  if (!modal) {
+    console.error('addWordModal not found');
+    return;
+  }
+
+  // Clear fields
+  document.getElementById('addWord').value = '';
+  document.getElementById('addCategory').value = '';
+  document.getElementById('addLevel').value = '';
+  document.getElementById('addMeaning').value = '';
+  document.getElementById('addPhonics').value = '';
+  document.getElementById('addIPA').value = '';
+  document.getElementById('addSyllable').value = '';
+  document.getElementById('addImageFile').value = '';
+
+  // Show modal
+  modal.style.display = 'flex';
+
+
+  // Load Settings
+  google.script.run
+
+    .withSuccessHandler(function(settings) {
+
+      console.log('Settings loaded:', settings);
+
+
+      const categorySelect =
+        document.getElementById('addCategory');
+
+      const levelSelect =
+        document.getElementById('addLevel');
+
+
+      categorySelect.innerHTML = '';
+
+levelSelect.innerHTML = '';
+
+
+      // Add Categories
+      if (
+        settings &&
+        settings.categories &&
+        settings.categories.length
+      ) {
+
+        settings.categories.forEach(function(category) {
+
+          const option =
+            document.createElement('option');
+
+          option.value = category;
+          option.textContent = category;
+
+          categorySelect.appendChild(option);
+
+        });
+
+      }
+
+
+      // Add Levels
+      if (
+        settings &&
+        settings.levels &&
+        settings.levels.length
+      ) {
+
+        settings.levels.forEach(function(level) {
+
+          const option =
+            document.createElement('option');
+
+          option.value = level;
+          option.textContent = level;
+
+          levelSelect.appendChild(option);
+
+        });
+
+      }
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      console.error('Settings error:', error);
+
+      alert(
+        'Unable to load Categories and Levels.\n\n' +
+        error.message
+      );
+
+    })
+
+    .getSettings();
+
+}
+
+/* =========================================
+   CLOSE ADD WORD
+========================================= */
+
+function closeAddWord() {
+
+  document.getElementById('addWordModal')
+    .style.display = 'none';
+
+  document.body.style.overflow = '';
+
+}
+
+
+/* =========================================
+   SAVE NEW WORD
+========================================= */
+
+function saveNewWord() {
+
+  const word =
+    document.getElementById('addWord').value.trim();
+
+  const category =
+    document.getElementById('addCategory').value;
+
+  const level =
+    document.getElementById('addLevel').value;
+
+  const meaning =
+    document.getElementById('addMeaning').value.trim();
+
+  const phonics =
+    document.getElementById('addPhonics').value.trim();
+
+  const ipa =
+    document.getElementById('addIPA').value.trim();
+
+  const syllable =
+    document.getElementById('addSyllable').value.trim();
+
+  const imageFile =
+    document.getElementById('addImageFile').files[0];
+
+
+  if (!word) {
+    alert('Please enter the word.');
+    return;
+  }
+
+
+  if (!category) {
+    alert('Please select a category.');
+    return;
+  }
+
+
+  if (!level) {
+    alert('Please select a level.');
+    return;
+  }
+
+
+  if (!imageFile) {
+    alert('Please select an image.');
+    return;
+  }
+
+
+  const status =
+    document.getElementById('imageUploadStatus');
+
+
+  status.textContent =
+    'Uploading image...';
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload = function(event) {
+
+    const base64 =
+      event.target.result.split(',')[1];
+
+
+    const fileData = {
+
+      base64: base64,
+
+      mimeType: imageFile.type
+
+    };
+
+
+    google.script.run
+
+      .withSuccessHandler(function(result) {
+
+        status.textContent =
+          'Image uploaded. Saving word...';
+
+
+        const newWord = {
+
+          Word: word,
+
+          Category: category,
+
+          Level: level,
+
+          Meaning: meaning,
+
+          Phonics: phonics,
+
+          IPA: ipa,
+
+          Syllable: syllable,
+
+          Image: result.fileName,
+
+          Favorite: ''
+
+        };
+
+
+        google.script.run
+
+          .withSuccessHandler(function() {
+
+            closeAddWord();
+
+            loadVocabulary();
+
+          })
+
+          .withFailureHandler(function(error) {
+
+            status.textContent = '';
+
+            alert(
+              error.message ||
+              'Unable to save word.'
+            );
+
+          })
+
+          .addVocabulary(newWord);
+
+      })
+
+      .withFailureHandler(function(error) {
+
+        status.textContent = '';
+
+        alert(
+          error.message ||
+          'Unable to upload image.'
+        );
+
+      })
+
+      .uploadVocabularyImage(
+        fileData,
+        word,
+        category
+      );
+
+  };
+
+
+  reader.readAsDataURL(imageFile);
+
+}
+
+function deleteCurrentWord() {
+
+  if (!currentWord) return;
+
+
+  const confirmed =
+    confirm(
+      'Delete "' +
+      currentWord.Word +
+      '" from Vocabulary?'
+    );
+
+
+  if (!confirmed) return;
+
+
+  google.script.run
+
+    .withSuccessHandler(function () {
+
+      vocabulary =
+        vocabulary.filter(function (item) {
+
+          return String(item.ID) !==
+            String(currentWord.ID);
+
+        });
+
+
+      closeEdit();
+
+      currentWord = null;
+
+      applyFilters();
+
+    })
+
+    .withFailureHandler(function (error) {
+
+      alert(
+        error.message ||
+        'Unable to delete word.'
+      );
+
+    })
+
+    .deleteVocabulary(
+      currentWord.ID
+    );
+
+}
+
+document
+  .getElementById('editImageFile')
+  .addEventListener('change', function () {
+
+    const file = this.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    const preview =
+      document.getElementById(
+        'editImagePreview'
+      );
+
+    preview.innerHTML = '';
+
+    const img =
+      document.createElement('img');
+
+    img.src =
+      URL.createObjectURL(file);
+
+    preview.appendChild(img);
+
+  });
+
+  function uploadEditedImage() {
+
+  const fileInput =
+    document.getElementById('editImageFile');
+
+  const word =
+    document.getElementById('editWord').value.trim();
+
+  if (!word) {
+    alert('Please enter the word first.');
+    return;
+  }
+
+  if (!fileInput.files.length) {
+    alert('Please choose an image.');
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    const base64 =
+      e.target.result.split(',')[1];
+
+    const fileData = {
+
+      base64: base64,
+
+      mimeType: file.type
+
+    };
+
+
+    google.script.run
+
+      .withSuccessHandler(function(result) {
+
+        document.getElementById('editImage').value =
+          result.url;
+
+        alert('Image updated successfully.');
+
+      })
+
+      .withFailureHandler(function(error) {
+
+        alert(
+          'Image upload failed:\n' +
+          error.message
+        );
+
+      })
+
+      .uploadVocabularyImage(
+        fileData,
+        word,
+        document.getElementById('editCategory').value
+      );
+
+  };
+
+
+  reader.readAsDataURL(file);
+
+}
+
+/* =========================================
+   SPEAK WORD FROM HOME CARD
+========================================= */
+
+function speakWord(word) {
+
+  if (!word) return;
+
+  window.speechSynthesis.cancel();
+
+  const speech =
+    new SpeechSynthesisUtterance(word);
+
+  speech.lang = 'en-US';
+
+  speech.rate = 0.85;
+
+  window.speechSynthesis.speak(speech);
+
+}
+
+</script>

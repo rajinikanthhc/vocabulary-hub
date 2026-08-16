@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <base target="_top">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <title>Vocabulary Hub</title>
+
+  <?!= include('CSS'); ?>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+  <!-- =====================================
+       HEADER
+  ====================================== -->
+
+  <header class="topbar">
+
+  <div>
+
+    <h1>Vocabulary Hub</h1>
+
+    <div class="subtitle">
+      Learn • Read • Speak
+    </div>
+
+  </div>
+
+
+  <button
+    class="addWordButton"
+    onclick="openAddWord()">
+
+    ＋ Add Word
+
+  </button>
+
+</header>
+
+  <!-- =====================================
+       SEARCH
+  ====================================== -->
+
+  <section class="searchSection">
+
+    <div class="searchBox">
+
+      <span class="searchIcon">🔎</span>
+
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search a word..."
+        oninput="applyFilters()">
+
+      <button
+        id="clearSearch"
+        class="clearButton"
+        onclick="clearSearch()"
+        style="display:none;">
+
+        ×
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================
+       FILTERS
+  ====================================== -->
+
+  <section class="filters">
+
+    <select
+      id="categoryFilter"
+      onchange="applyFilters()">
+
+      <option value="">
+        All Categories
+      </option>
+
+    </select>
+
+
+    <select
+      id="levelFilter"
+      onchange="applyFilters()">
+
+      <option value="">
+        All Levels
+      </option>
+
+    </select>
+
+
+    <button
+      id="favoriteFilter"
+      class="favoriteFilter"
+      onclick="toggleFavoriteFilter()">
+
+      ☆ Favorites
+
+    </button>
+
+    <select
+  id="sortFilter"
+  class="sortFilter"
+  onchange="applyFilters()">
+
+  <option value="newest">Newest → Oldest</option>
+
+  <option value="az">A → Z</option>
+
+  <option value="za">Z → A</option>
+
+  <option value="oldest">Oldest → Newest</option>
+
+</select>
+
+  </section>
+
+
+  <!-- =====================================
+       RESULT COUNT
+  ====================================== -->
+
+  <div class="resultBar">
+
+    <span id="resultCount">
+      Loading...
+    </span>
+
+  </div>
+
+
+  <!-- =====================================
+       WORD LIST
+  ====================================== -->
+
+  <main id="wordList"
+        class="wordList">
+
+  </main>
+
+
+  <!-- =====================================
+       NO RESULTS
+  ====================================== -->
+
+  <div
+    id="noResults"
+    class="noResults"
+    style="display:none;">
+
+    <div class="noResultsIcon">
+      📚
+    </div>
+
+    <h2>No words found</h2>
+
+    <p>
+      Try another search or filter.
+    </p>
+
+  </div>
+
+
+  <!-- =====================================
+       WORD DETAIL MODAL
+  ====================================== -->
+
+  <div
+    id="wordModal"
+    class="modal"
+    style="display:none;">
+
+    <div class="modalOverlay"
+         onclick="closeWord()">
+    </div>
+
+
+    <div class="modalCard">
+
+
+      <button
+        class="closeButton"
+        onclick="closeWord()">
+
+        ×
+
+      </button>
+
+
+      <div
+        id="modalImage"
+        class="modalImage">
+
+      </div>
+
+
+      <div class="modalContent">
+
+
+        <div class="modalCategory"
+             id="modalCategory">
+        </div>
+
+
+        <h2 id="modalWord">
+        </h2>
+
+
+        <button
+          class="speakButton"
+          onclick="speakCurrentWord()">
+
+          🔊 Hear Word
+
+        </button>
+
+
+        <div class="detailBox">
+
+          <div class="detailLabel">
+            Meaning
+          </div>
+
+          <div
+            id="modalMeaning"
+            class="detailValue">
+          </div>
+
+        </div>
+
+
+        <div class="detailGrid">
+
+
+          <div class="smallDetail">
+
+            <div class="detailLabel">
+              Phonics
+            </div>
+
+            <div id="modalPhonics">
+            </div>
+
+          </div>
+
+
+          <div class="smallDetail">
+
+            <div class="detailLabel">
+              IPA
+            </div>
+
+            <div id="modalIPA">
+            </div>
+
+          </div>
+
+
+          <div class="smallDetail">
+
+            <div class="detailLabel">
+              Syllable
+            </div>
+
+            <div id="modalSyllable">
+            </div>
+
+          </div>
+
+
+          <div class="smallDetail">
+
+            <div class="detailLabel">
+              Level
+            </div>
+
+            <div id="modalLevel">
+            </div>
+
+          </div>
+
+
+        </div>
+
+
+        <button
+          id="modalFavorite"
+          class="modalFavorite"
+          onclick="toggleCurrentFavorite()">
+
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+    </div>
+
+
+  <!-- =====================================
+       EDIT WORD MODAL
+  ====================================== -->
+
+  <div
+    id="editModal"
+    class="modal"
+    style="display:none;">
+
+    <div
+      class="modalOverlay"
+      onclick="closeEdit()">
+    </div>
+
+
+    <div class="modalCard editCard">
+
+      <button
+        class="closeButton"
+        onclick="closeEdit()">
+
+        ×
+
+      </button>
+
+
+      <div class="modalContent">
+
+        <h2>Edit Word</h2>
+
+
+        <div class="editForm">
+
+
+          <label>
+            Word
+          </label>
+
+          <input
+            id="editWord">
+
+
+          <label>
+            Category
+          </label>
+
+          <input
+            id="editCategory">
+
+
+          <label>
+            Level
+          </label>
+
+          <input
+            id="editLevel">
+
+
+          <label>
+            Meaning
+          </label>
+
+          <textarea
+            id="editMeaning">
+          </textarea>
+
+
+          <label>
+            Phonics
+          </label>
+
+          <input
+            id="editPhonics">
+
+
+          <label>
+            IPA
+          </label>
+
+          <input
+            id="editIPA">
+
+
+          <label>
+            Syllable
+          </label>
+
+          <input
+            id="editSyllable">
+
+
+          <label>
+  Image
+</label>
+
+<input
+  id="editImage"
+  readonly>
+
+<input
+  type="file"
+  id="editImageFile"
+  accept="image/*">
+
+  <button
+  type="button"
+  class="uploadImageButton"
+  onclick="uploadEditedImage()">
+
+  📷 Update Image
+
+</button>
+
+<div
+  id="editImagePreview"
+  class="editImagePreview">
+</div>
+
+          <div class="editButtons">
+
+
+            <button
+              class="saveEditButton"
+              onclick="saveEditedWord()">
+
+              Save Changes
+
+            </button>
+
+
+            <button
+              class="deleteEditButton"
+              onclick="deleteCurrentWord()">
+
+              🗑️ Delete Word
+
+            </button>
+
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+    </div>
+
+
+  <!-- =====================================
+       ADD WORD MODAL
+  ====================================== -->
+
+  <div
+    id="addWordModal"
+    class="modal"
+    style="display:none;">
+
+    <div
+      class="modalOverlay"
+      onclick="closeAddWord()">
+    </div>
+
+
+    <div class="modalCard editCard">
+
+      <button
+        class="closeButton"
+        onclick="closeAddWord()">
+
+        ×
+
+      </button>
+
+
+      <div class="modalContent">
+
+        <h2>Add New Word</h2>
+
+
+        <div class="editForm">
+
+
+          <label>
+            Word
+          </label>
+
+          <input
+            type="text"
+            id="addWord">
+
+
+          <label>
+  Category
+</label>
+
+<select id="addCategory">
+
+  <option value="">
+    Select Category
+  </option>
+
+</select>
+
+
+<label>
+  Level
+</label>
+
+<select id="addLevel">
+
+  <option value="">
+    Select Level
+  </option>
+
+</select>
+
+
+          <label>
+            Meaning
+          </label>
+
+          <textarea
+            id="addMeaning">
+          </textarea>
+
+
+          <label>
+            Phonics
+          </label>
+
+          <input
+            type="text"
+            id="addPhonics">
+
+
+          <label>
+            IPA
+          </label>
+
+          <input
+            type="text"
+            id="addIPA">
+
+
+          <label>
+            Syllable
+          </label>
+
+          <input
+            type="text"
+            id="addSyllable">
+
+
+          <label>
+  Image
+</label>
+
+<input
+  type="file"
+  id="addImageFile"
+  accept="image/*">
+
+<div
+  id="imageUploadStatus"
+  class="imageUploadStatus">
+</div>
+
+
+          <button
+            type="button"
+            class="saveEditButton addSaveButton"
+            onclick="saveNewWord()">
+
+            ＋ Add Word
+
+          </button>
+
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+</div>
+
+
+<?!= include('JS'); ?>
+
+</body>
+
+</html>

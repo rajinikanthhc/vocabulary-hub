@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <base target="_top">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <?!= include('CSS'); ?>
+
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+  <div>
+
+    <h1>Vocabulary Hub</h1>
+
+    <div class="subtitle">
+      Learn • Remember • Practice
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<div class="formPage">
+
+
+  <button
+    class="backButton"
+    onclick="goBack()">
+
+    ← Back
+
+  </button>
+
+
+  <div class="formCard">
+
+    <h2 id="formTitle">
+      Add New Word
+    </h2>
+
+
+    <input
+      type="hidden"
+      id="editRow">
+
+
+    <div class="formGrid">
+
+
+      <div class="field">
+
+        <label>
+          Category
+        </label>
+
+        <select id="category">
+
+          <option value="">
+            Select Category
+          </option>
+
+        </select>
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Level
+        </label>
+
+        <select id="level">
+
+          <option value="">
+            Select Level
+          </option>
+
+        </select>
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Word *
+        </label>
+
+        <input
+          id="word"
+          type="text"
+          placeholder="Enter word">
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Image
+        </label>
+
+        <input
+          id="imageFile"
+          type="file"
+          accept="image/*"
+          onchange="previewImage()">
+
+        <img
+          id="imagePreview"
+          class="imagePreview">
+
+      </div>
+
+
+
+      <div class="field full">
+
+        <label>
+          Meaning
+        </label>
+
+        <textarea
+          id="meaning"
+          placeholder="Enter meaning"></textarea>
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Phonics
+        </label>
+
+        <input
+          id="phonics"
+          type="text"
+          placeholder="Enter phonics">
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          IPA
+        </label>
+
+        <input
+          id="ipa"
+          type="text"
+          placeholder="Enter IPA">
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Syllable
+        </label>
+
+        <input
+          id="syllable"
+          type="text"
+          placeholder="Example: 2">
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Favorite
+        </label>
+
+        <select id="favorite">
+
+          <option value="No">
+            No
+          </option>
+
+          <option value="Yes">
+            Yes
+          </option>
+
+        </select>
+
+      </div>
+
+
+    </div>
+
+
+    <div
+      id="formMessage"
+      class="formMessage">
+    </div>
+
+
+    <div class="formButtons">
+
+      <button
+        class="cancelButton"
+        onclick="goBack()">
+
+        Cancel
+
+      </button>
+
+
+      <button
+        class="saveButton"
+        onclick="saveWordForm()">
+
+        Save Word
+
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+  <?!= include('JS'); ?>
+
+</script>
+
+
+</body>
+
+</html>
