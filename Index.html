@@ -38,6 +38,8 @@
   </div>
 
 
+  <div class="headerButtons">
+
   <button
     class="addWordButton"
     onclick="openAddWord()">
@@ -45,6 +47,16 @@
     ＋ Add Word
 
   </button>
+
+  <button
+    class="addWordButton"
+    onclick="openGoogleSheet()">
+
+    📊 Google Sheet
+
+  </button>
+
+</div>
 
 </header>
 
@@ -241,6 +253,14 @@
 
         </button>
 
+        <button
+  class="sentenceButton"
+  onclick="searchSentences()">
+
+  📖 Sentences
+
+</button>
+
         <div class="wordNavigation">
 
   <button
@@ -335,30 +355,7 @@
 
         </button>
 
-        <div class="wordNavigation">
-
-  <button
-    id="previousWordButton"
-    onclick="openPreviousWord()">
-
-    ← Previous
-
-  </button>
-
-
-  <button
-    id="nextWordButton"
-    onclick="openNextWord()">
-
-    Next →
-
-  </button>
-
-</div>
-
-
       </div>
-
 
     </div>
 

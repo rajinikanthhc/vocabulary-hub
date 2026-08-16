@@ -2005,4 +2005,97 @@ function autoFillWordData() {
 
 }
 
+/* =========================================
+   OPEN GOOGLE SHEET
+========================================= */
+
+function openGoogleSheet() {
+
+  window.open(
+    'https://docs.google.com/spreadsheets/d/1jHhZZFxCMvKwvOzACZEOVEY79RVUjPpQPy4Io_ELutE/edit?gid=0#gid=0',
+    '_blank'
+  );
+
+}
+
+/* =========================================
+   KEYBOARD WORD NAVIGATION
+========================================= */
+
+document.addEventListener('keydown', function (event) {
+
+  const modal =
+    document.getElementById('wordModal');
+
+  // Only work when Word Detail window is open
+  if (
+    !modal ||
+    modal.style.display === 'none'
+  ) {
+    return;
+  }
+
+  // Don't interfere with typing
+  const active =
+    document.activeElement;
+
+  if (
+    active &&
+    (
+      active.tagName === 'INPUT' ||
+      active.tagName === 'TEXTAREA' ||
+      active.tagName === 'SELECT'
+    )
+  ) {
+    return;
+  }
+
+
+  // Left Arrow = Previous
+  if (event.key === 'ArrowLeft') {
+
+    event.preventDefault();
+
+    openPreviousWord();
+
+  }
+
+
+  // Right Arrow = Next
+  if (event.key === 'ArrowRight') {
+
+    event.preventDefault();
+
+    openNextWord();
+
+  }
+
+});
+
+/* =========================================
+   SEARCH EASY SENTENCES
+========================================= */
+
+function searchSentences() {
+
+  if (!currentWord || !currentWord.Word) {
+    return;
+  }
+
+  const word =
+    currentWord.Word.trim();
+
+  const query =
+    'English easy 10 sentences for word "' +
+    word +
+    '"';
+
+  const url =
+    'https://www.google.com/search?q=' +
+    encodeURIComponent(query);
+
+  window.open(url, '_blank');
+
+}
+
 </script>
