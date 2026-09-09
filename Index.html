@@ -6,8 +6,9 @@
 
   <base target="_top">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1">
 
   <title>Vocabulary Hub</title>
 
@@ -27,38 +28,40 @@
 
   <header class="topbar">
 
-  <div>
+    <div>
 
-    <h1>Vocabulary Hub</h1>
+      <h1>Vocabulary Hub</h1>
 
-    <div class="subtitle">
-      Learn • Read • Speak
+      <div class="subtitle">
+        Learn • Read • Speak
+      </div>
+
     </div>
 
-  </div>
+
+    <div class="headerButtons">
+
+      <button
+        class="addWordButton"
+        onclick="openAddWord()">
+
+        ＋ Add Word
+
+      </button>
 
 
-  <div class="headerButtons">
+      <button
+        class="addWordButton"
+        onclick="openGoogleSheet()">
 
-  <button
-    class="addWordButton"
-    onclick="openAddWord()">
+        📊 Google Sheet
 
-    ＋ Add Word
+      </button>
 
-  </button>
+    </div>
 
-  <button
-    class="addWordButton"
-    onclick="openGoogleSheet()">
+  </header>
 
-    📊 Google Sheet
-
-  </button>
-
-</div>
-
-</header>
 
   <!-- =====================================
        SEARCH
@@ -68,13 +71,17 @@
 
     <div class="searchBox">
 
-      <span class="searchIcon">🔎</span>
+      <span class="searchIcon">
+        🔎
+      </span>
+
 
       <input
-        type="text"
-        id="searchInput"
-        placeholder="Search a word..."
-        oninput="applyFilters()">
+  type="text"
+  id="searchInput"
+  placeholder="Search a word..."
+  oninput="applyFilters()">
+
 
       <button
         id="clearSearch"
@@ -128,29 +135,39 @@
 
     </button>
 
+
     <select
-  id="sortFilter"
-  class="sortFilter"
-  onchange="applyFilters()">
+      id="sortFilter"
+      class="sortFilter"
+      onchange="applyFilters()">
 
-  <option value="newest">Newest → Oldest</option>
+      <option value="newest">
+        Newest → Oldest
+      </option>
 
-  <option value="az">A → Z</option>
+      <option value="az">
+        A → Z
+      </option>
 
-  <option value="za">Z → A</option>
+      <option value="za">
+        Z → A
+      </option>
 
-  <option value="oldest">Oldest → Newest</option>
+      <option value="oldest">
+        Oldest → Newest
+      </option>
 
-</select>
+    </select>
 
-<button
-  id="shuffleButton"
-  class="favoriteFilter"
-  onclick="shuffleWords()">
 
-  🔀 Shuffle
+    <button
+      id="shuffleButton"
+      class="favoriteFilter"
+      onclick="shuffleWords()">
 
-</button>
+      🔀 Shuffle
+
+    </button>
 
   </section>
 
@@ -172,9 +189,9 @@
        WORD LIST
   ====================================== -->
 
-  <main id="wordList"
-        class="wordList">
-
+  <main
+    id="wordList"
+    class="wordList">
   </main>
 
 
@@ -209,13 +226,13 @@
     class="modal"
     style="display:none;">
 
-    <div class="modalOverlay"
-         onclick="closeWord()">
+    <div
+      class="modalOverlay"
+      onclick="closeWord()">
     </div>
 
 
     <div class="modalCard">
-
 
       <button
         class="closeButton"
@@ -229,15 +246,14 @@
       <div
         id="modalImage"
         class="modalImage">
-
       </div>
 
 
       <div class="modalContent">
 
-
-        <div class="modalCategory"
-             id="modalCategory">
+        <div
+          class="modalCategory"
+          id="modalCategory">
         </div>
 
 
@@ -253,31 +269,38 @@
 
         </button>
 
+
         <button
-  class="sentenceButton"
-  onclick="searchSentences()">
+          class="sentenceButton"
+          onclick="searchSentences()">
 
-  📖 Sentences
+          📖 Sentences
 
-</button>
+        </button>
+
 
         <div class="wordNavigation">
 
-  <button
-    id="previousWordButton"
-    class="navigationButton"
-    onclick="openPreviousWord()">
-    ← Previous
-  </button>
+          <button
+            id="previousWordButton"
+            class="navigationButton"
+            onclick="openPreviousWord()">
 
-  <button
-    id="nextWordButton"
-    class="navigationButton"
-    onclick="openNextWord()">
-    Next →
-  </button>
+            ← Previous
 
-</div>
+          </button>
+
+
+          <button
+            id="nextWordButton"
+            class="navigationButton"
+            onclick="openNextWord()">
+
+            Next →
+
+          </button>
+
+        </div>
 
 
         <div class="detailBox">
@@ -285,6 +308,7 @@
           <div class="detailLabel">
             Meaning
           </div>
+
 
           <div
             id="modalMeaning"
@@ -295,7 +319,6 @@
 
 
         <div class="detailGrid">
-
 
           <div class="smallDetail">
 
@@ -344,7 +367,6 @@
 
           </div>
 
-
         </div>
 
 
@@ -352,166 +374,228 @@
           id="modalFavorite"
           class="modalFavorite"
           onclick="toggleCurrentFavorite()">
-
         </button>
 
       </div>
 
     </div>
 
-    </div>
+  </div>
 
 
   <!-- =====================================
-       EDIT WORD MODAL
-  ====================================== -->
-
-  <div
-    id="editModal"
-    class="modal"
-    style="display:none;">
-
-    <div
-      class="modalOverlay"
-      onclick="closeEdit()">
-    </div>
-
-
-    <div class="modalCard editCard">
-
-      <button
-        class="closeButton"
-        onclick="closeEdit()">
-
-        ×
-
-      </button>
-
-
-      <div class="modalContent">
-
-        <h2>Edit Word</h2>
-
-
-        <div class="editForm">
-
-
-          <label>
-            Word
-          </label>
-
-          <input
-            id="editWord">
-
-
-          <label>
-            Category
-          </label>
-
-          <input
-            id="editCategory">
-
-
-          <label>
-            Level
-          </label>
-
-          <input
-            id="editLevel">
-
-
-          <label>
-            Meaning
-          </label>
-
-          <textarea
-            id="editMeaning">
-          </textarea>
-
-
-          <label>
-            Phonics
-          </label>
-
-          <input
-            id="editPhonics">
-
-
-          <label>
-            IPA
-          </label>
-
-          <input
-            id="editIPA">
-
-
-          <label>
-            Syllable
-          </label>
-
-          <input
-            id="editSyllable">
-
-
-          <label>
-  Image
-</label>
-
-<input
-  id="editImage"
-  readonly>
-
-<input
-  type="file"
-  id="editImageFile"
-  accept="image/*">
-
-  <button
-  type="button"
-  class="uploadImageButton"
-  onclick="uploadEditedImage()">
-
-  📷 Update Image
-
-</button>
+     EDIT WORD MODAL
+====================================== -->
 
 <div
-  id="editImagePreview"
-  class="editImagePreview">
-</div>
+  id="editModal"
+  class="modal"
+  style="display:none;">
 
-          <div class="editButtons">
-
-
-            <button
-              class="saveEditButton"
-              onclick="saveEditedWord()">
-
-              Save Changes
-
-            </button>
+  <div
+    class="modalOverlay"
+    onclick="closeEdit()">
+  </div>
 
 
-            <button
-              class="deleteEditButton"
-              onclick="deleteCurrentWord()">
+  <div class="modalCard editCard">
 
-              🗑️ Delete Word
+    <button
+      class="closeButton"
+      onclick="closeEdit()">
 
-            </button>
+      ×
+
+    </button>
 
 
-          </div>
+    <div class="modalContent">
 
+      <h2>Edit Word</h2>
+
+
+      <div class="editForm">
+
+
+        <!-- WORD -->
+
+        <label>
+          Word
+        </label>
+
+        <input
+          type="text"
+          id="editWord">
+
+
+        <!-- AUTO FILL -->
+
+        <button
+          type="button"
+          class="autoFillButton"
+          onclick="autoFillEditWordData()">
+
+          ✨ Auto Fill
+
+        </button>
+
+
+        <!-- CATEGORY -->
+
+        <label>
+          Category
+        </label>
+
+        <input
+          type="text"
+          id="editCategory"
+          placeholder="Automatically determined">
+
+
+        <!-- LEVEL -->
+
+        <label>
+          Level
+        </label>
+
+        <input
+          type="text"
+          id="editLevel"
+          placeholder="Automatically determined">
+
+
+        <!-- MEANING -->
+
+        <label>
+          Meaning
+        </label>
+
+        <textarea
+          id="editMeaning"></textarea>
+
+
+        <!-- PHONICS -->
+
+        <label>
+          Phonics
+        </label>
+
+        <input
+          type="text"
+          id="editPhonics">
+
+
+        <!-- IPA -->
+
+        <label>
+          IPA
+        </label>
+
+        <input
+          type="text"
+          id="editIPA">
+
+
+        <!-- SYLLABLE -->
+
+        <label>
+          Syllable
+        </label>
+
+        <input
+          type="text"
+          id="editSyllable">
+
+
+        <!-- IMAGE -->
+
+        <label>
+          Image
+        </label>
+
+        <input
+          id="editImage"
+          readonly>
+
+
+        <input
+          type="hidden"
+          id="editImageUrl"
+          value="">
+
+
+        <div
+          id="editAutomaticImagePreview"
+          style="
+            margin-top:8px;
+            min-height:20px;
+          ">
+        </div>
+
+
+        <div
+          id="editImageUploadStatus"
+          class="imageUploadStatus">
+        </div>
+
+
+        <!-- MANUAL IMAGE -->
+
+        <input
+          type="file"
+          id="editImageFile"
+          accept="image/*">
+
+
+        <button
+          type="button"
+          class="uploadImageButton"
+          onclick="uploadEditedImage()">
+
+          📷 Update Image
+
+        </button>
+
+
+        <div
+          id="editImagePreview"
+          class="editImagePreview">
+        </div>
+
+
+        <!-- BUTTONS -->
+
+        <div class="editButtons">
+
+          <button
+            type="button"
+            class="saveEditButton"
+            onclick="saveEditedWord()">
+
+            Save Changes
+
+          </button>
+
+
+          <button
+            type="button"
+            class="deleteEditButton"
+            onclick="deleteCurrentWord()">
+
+            🗑️ Delete Word
+
+          </button>
 
         </div>
+
 
       </div>
 
     </div>
 
-    </div>
+  </div>
 
+</div>
 
   <!-- =====================================
        ADD WORD MODAL
@@ -547,100 +631,137 @@
         <div class="editForm">
 
 
-          <label>
-  Word
-</label>
+          <!-- WORD -->
 
-<input
+          <label>
+            Word
+          </label>
+
+
+          <input
+            type="text"
+            id="addWord">
+
+
+          <button
+            type="button"
+            class="autoFillButton"
+            onclick="autoFillWordData()">
+
+            ✨ Auto Fill
+
+          </button>
+
+
+          <!-- CATEGORY -->
+
+          <label>
+            Category
+          </label>
+
+
+          <input
   type="text"
-  id="addWord">
+  id="addCategory"
+  placeholder="Automatically determined">
 
-<button
-  type="button"
-  class="autoFillButton"
-  onclick="autoFillWordData()">
 
-  ✨ Auto Fill
-
-</button>
-
+          <!-- LEVEL -->
 
           <label>
-  Category
-</label>
-
-<select id="addCategory">
-
-  <option value="">
-    Select Category
-  </option>
-
-</select>
+            Level
+          </label>
 
 
-<label>
-  Level
-</label>
+          <input
+  type="text"
+  id="addLevel"
+  placeholder="Automatically determined">
 
-<select id="addLevel">
 
-  <option value="">
-    Select Level
-  </option>
-
-</select>
-
+          <!-- MEANING -->
 
           <label>
             Meaning
           </label>
+
 
           <textarea
             id="addMeaning">
           </textarea>
 
 
+          <!-- PHONICS -->
+
           <label>
             Phonics
           </label>
+
 
           <input
             type="text"
             id="addPhonics">
 
 
+          <!-- IPA -->
+
           <label>
             IPA
           </label>
+
 
           <input
             type="text"
             id="addIPA">
 
 
+          <!-- SYLLABLE -->
+
           <label>
             Syllable
           </label>
+
 
           <input
             type="text"
             id="addSyllable">
 
 
+          <!-- IMAGE -->
+
           <label>
-  Image
-</label>
+            Image
+          </label>
 
-<input
-  type="file"
-  id="addImageFile"
-  accept="image/*">
 
-<div
-  id="imageUploadStatus"
-  class="imageUploadStatus">
-</div>
+          <input
+            type="file"
+            id="addImageFile"
+            accept="image/*">
 
+
+          <input
+            type="hidden"
+            id="addImageUrl"
+            value="">
+
+
+          <div
+            id="automaticImagePreview"
+            style="
+              margin-top:8px;
+              min-height:20px;
+            ">
+          </div>
+
+
+          <div
+            id="imageUploadStatus"
+            class="imageUploadStatus">
+          </div>
+
+
+          <!-- SAVE -->
 
           <button
             type="button"

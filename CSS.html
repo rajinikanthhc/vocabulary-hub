@@ -1185,4 +1185,218 @@ select {
   color: white;
 }
 
+/* =========================================
+   NEAT ADD / EDIT WORD FORM
+========================================= */
+
+/* Keep Add/Edit modal as a normal single-column form */
+.editCard {
+  width: min(560px, 92vw);
+  max-width: 560px;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+
+/* Form content scrolls vertically */
+.editCard .modalContent {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 28px 32px 32px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 90vh;
+}
+
+
+/* Title */
+.editCard .modalContent h2 {
+  margin: 0 0 22px;
+  font-size: 30px;
+  line-height: 1.15;
+  color: #263238;
+}
+
+
+/* Form */
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+
+/* Labels */
+.editForm label {
+  display: block;
+  margin-top: 7px;
+  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #455a64;
+}
+
+
+/* Inputs, selects and textarea */
+.editForm input,
+.editForm select,
+.editForm textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #cbd5da;
+  border-radius: 8px;
+  background: #fff;
+  color: #263238;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+
+/* Textarea */
+.editForm textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+
+/* Focus */
+.editForm input:focus,
+.editForm select:focus,
+.editForm textarea:focus {
+  border-color: #176f67;
+  box-shadow: 0 0 0 2px rgba(23, 111, 103, 0.12);
+}
+
+
+/* Auto Fill button */
+.autoFillButton {
+  width: 100%;
+  margin: 4px 0 8px;
+  padding: 10px 14px;
+  border: 1px solid #176f67;
+  border-radius: 8px;
+  background: #fff;
+  color: #176f67;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+.autoFillButton:hover {
+  background: #176f67;
+  color: #fff;
+}
+
+
+/* Image file input */
+.editForm input[type="file"] {
+  padding: 8px;
+  background: #f8fafb;
+}
+
+
+/* Image upload button */
+.uploadImageButton {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 14px;
+  border: 1px solid #176f67;
+  border-radius: 8px;
+  background: #fff;
+  color: #176f67;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+.uploadImageButton:hover {
+  background: #176f67;
+  color: #fff;
+}
+
+
+/* Image status */
+.imageUploadStatus {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+
+/* Add/Edit buttons */
+.editButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+
+.editButtons button {
+  flex: 1;
+  min-height: 42px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+/* Save */
+.saveEditButton {
+  border: 1px solid #176f67;
+  background: #176f67;
+  color: white;
+}
+
+
+.saveEditButton:hover {
+  opacity: 0.9;
+}
+
+
+/* Delete */
+.deleteEditButton {
+  border: 1px solid #d9534f;
+  background: white;
+  color: #d9534f;
+}
+
+
+.deleteEditButton:hover {
+  background: #d9534f;
+  color: white;
+}
+
+
+/* Close button stays at top-right */
+.editCard .closeButton {
+  z-index: 20;
+}
+
+
+/* Mobile */
+@media (max-width: 600px) {
+
+  .editCard {
+    width: 94vw;
+    max-width: 94vw;
+  }
+
+  .editCard .modalContent {
+    padding: 22px 18px 25px;
+  }
+
+  .editCard .modalContent h2 {
+    font-size: 26px;
+  }
+
+  .editButtons {
+    flex-direction: column;
+  }
+
+}
+
 </style>
