@@ -2454,627 +2454,262 @@ function checkDuplicateWord(word) {
 function searchFreeImages(word, meaning, category) {
 
   word = String(word || '').trim();
-  meaning = String(meaning || '').trim();
   category = String(category || '').trim();
 
   if (!word) {
-    return {
-      images: []
-    };
+    return [];
   }
 
   const results = [];
-  const seen = {};
 
-  function addResults(items) {
+  // =========================================
+  // WORD + CATEGORY ONLY
+  // =========================================
 
-    if (!Array.isArray(items)) {
-      return;
-    }
+  const query = category
+    ? word + ' ' + category
+    : word;
 
-    items.forEach(function(item) {
 
-      if (!item) {
-        return;
-      }
-
-      const imageUrl =
-        String(
-          item.imageUrl ||
-          item.thumbnailUrl ||
-          item.url ||
-          ''
-        ).trim();
-
-      if (!imageUrl) {
-        return;
-      }
-
-      if (seen[imageUrl]) {
-        return;
-      }
-
-      seen[imageUrl] = true;
-
-      results.push({
-        imageUrl: imageUrl,
-        title:
-          String(
-            item.title ||
-            word
-          )
-      });
-
-    });
-
-  }
-
-
-  /* =====================================
-     1. WIKIMEDIA EXACT WORD
-  ====================================== */
-
-  try {
-
-    addResults(
-      searchWikimediaImages_(word)
-    );
-
-  } catch (error) {
-
-    console.log(
-      'Wikimedia exact search error: ' +
-      error
-    );
-
-  }
-
-
-  /* =====================================
-     2. OPENVERSE EXACT WORD
-  ====================================== */
-
-  if (results.length < 10) {
-
-    try {
-
-      addResults(
-        searchOpenverseImages_(word)
-      );
-
-    } catch (error) {
-
-      console.log(
-        'Openverse exact search error: ' +
-        error
-      );
-
-    }
-
-  }
-
-
-  /* =====================================
-     3. WORD + CATEGORY
-  ====================================== */
-
-  if (
-    results.length < 5 &&
-    category
-  ) {
-
-    const query =
-      word +
-      ' ' +
-      category;
-
-
-    try {
-
-      addResults(
-        searchWikimediaImages_(query)
-      );
-
-    } catch (error) {
-
-      console.log(
-        'Wikimedia category search error: ' +
-        error
-      );
-
-    }
-
-
-    if (results.length < 5) {
-
-      try {
-
-        addResults(
-          searchOpenverseImages_(query)
-        );
-
-      } catch (error) {
-
-        console.log(
-          'Openverse category search error: ' +
-          error
-        );
-
-      }
-
-    }
-
-  }
-
-
-  /* =====================================
-     4. WORD + IMPORTANT MEANING WORDS
-  ====================================== */
-
-  if (
-    results.length < 5 &&
-    meaning
-  ) {
-
-    const meaningWords =
-      meaning
-        .toLowerCase()
-        .replace(
-          /[^a-z\s-]/g,
-          ' '
-        )
-        .split(/\s+/)
-        .filter(function(item) {
-
-          return (
-            item.length >= 4 &&
-            !isCommonImageStopWord_(item)
-          );
-
-        })
-        .slice(0, 3);
-
-
-    if (meaningWords.length) {
-
-      const query =
-        word +
-        ' ' +
-        meaningWords.join(' ');
-
-
-      try {
-
-        addResults(
-          searchWikimediaImages_(query)
-        );
-
-      } catch (error) {
-
-        console.log(
-          'Wikimedia meaning search error: ' +
-          error
-        );
-
-      }
-
-
-      if (results.length < 5) {
-
-        try {
-
-          addResults(
-            searchOpenverseImages_(query)
-          );
-
-        } catch (error) {
-
-          console.log(
-            'Openverse meaning search error: ' +
-            error
-          );
-
-        }
-
-      }
-
-    }
-
-  }
-
-
-  /* =====================================
-     5. SPECIAL NAMES
-  ====================================== */
-
-  const alternatives = {
-
-    eggplant: [
-      'aubergine',
-      'brinjal'
-    ],
-
-    aubergine: [
-      'eggplant',
-      'brinjal'
-    ],
-
-    brinjal: [
-      'eggplant',
-      'aubergine'
-    ]
-
-  };
-
-
-  const alternateWords =
-    alternatives[
-      word.toLowerCase()
-    ] || [];
-
-
-  for (
-    let i = 0;
-    i < alternateWords.length;
-    i++
-  ) {
-
-    if (results.length >= 5) {
-      break;
-    }
-
-    try {
-
-      addResults(
-        searchWikimediaImages_(
-          alternateWords[i]
-        )
-      );
-
-    } catch (error) {
-
-      console.log(
-        'Alternative Wikimedia search error: ' +
-        error
-      );
-
-    }
-
-  }
-
-
-  console.log(
-    'Image search for "' +
-    word +
-    '" returned ' +
-    results.length +
-    ' images.'
+  // Wikimedia
+  addImageResults_(
+    results,
+    searchWikimediaImages_(query)
   );
 
 
-  return {
+  // Openverse
+  addImageResults_(
+    results,
+    searchOpenverseImages_(query)
+  );
 
-    images:
-      results.slice(0, 5)
 
-  };
+  // =========================================
+  // REMOVE DUPLICATES
+  // =========================================
 
+  const unique = [];
+  const seen = {};
+
+  results.forEach(function(item) {
+
+    const url =
+      String(
+        item.url ||
+        item.URL ||
+        item.imageUrl ||
+        item.thumbnailUrl ||
+        ''
+      ).trim();
+
+    if (!url) {
+      return;
+    }
+
+    if (seen[url]) {
+      return;
+    }
+
+    seen[url] = true;
+
+    unique.push({
+      imageUrl: url,
+      thumbnailUrl: url,
+      url: url,
+      title: item.title || word,
+      source: item.source || ''
+    });
+
+  });
+
+
+  return unique.slice(0, 5);
 }
-
 
 /* =========================================
    OPENVERSE SEARCH
 ========================================= */
 
-function searchOpenverseImages_(searchTerm) {
+function searchOpenverseImages_(query) {
 
-  const url =
-    'https://api.openverse.org/v1/images/?q=' +
-    encodeURIComponent(
-      String(searchTerm || '').trim()
-    ) +
-    '&page_size=20';
-
-
-  const response =
-    UrlFetchApp.fetch(
-      url,
-      {
-        method: 'get',
-        muteHttpExceptions: true,
-        headers: {
-          Accept: 'application/json'
-        }
-      }
-    );
-
-
-  const code =
-    response.getResponseCode();
-
-
-  if (code !== 200) {
-
-    console.log(
-      'Openverse HTTP ' +
-      code +
-      ': ' +
-      response.getContentText()
-    );
-
-    return [];
-
-  }
-
-
-  let data = null;
-
-
-  try {
-
-    data =
-      JSON.parse(
-        response.getContentText()
-      );
-
-  } catch (error) {
-
-    console.log(
-      'Openverse JSON error: ' +
-      error
-    );
-
-    return [];
-
-  }
-
-
-  if (
-    !data ||
-    !Array.isArray(
-      data.results
-    )
-  ) {
-
-    return [];
-
-  }
-
-
-  return data.results
-    .map(function(item) {
-
-      if (!item) {
-        return null;
-      }
-
-      return {
-
-        imageUrl:
-          item.thumbnail ||
-          item.url ||
-          '',
-
-        title:
-          item.title ||
-          '',
-
-        description:
-          item.description ||
-          '',
-
-        tags:
-          Array.isArray(item.tags)
-            ? item.tags
-                .map(function(tag) {
-
-                  if (
-                    typeof tag === 'string'
-                  ) {
-
-                    return tag;
-
-                  }
-
-                  return (
-                    tag.name ||
-                    ''
-                  );
-
-                })
-                .join(' ')
-            : ''
-
-      };
-
-    })
-    .filter(function(item) {
-
-      return (
-        item &&
-        item.imageUrl
-      );
-
-    });
-
-}
-
-
-/* =========================================
-   WIKIMEDIA COMMONS SEARCH
-========================================= */
-
-function searchWikimediaImages_(searchTerm) {
-
-  const query =
-    String(searchTerm || '').trim();
-
+  query = String(query || '').trim();
 
   if (!query) {
     return [];
   }
 
-
-  const url =
-    'https://commons.wikimedia.org/w/api.php' +
-    '?action=query' +
-    '&format=json' +
-    '&generator=search' +
-    '&gsrsearch=' +
-    encodeURIComponent(query) +
-    '&gsrnamespace=6' +
-    '&gsrlimit=20' +
-    '&prop=imageinfo' +
-    '&iiprop=url|extmetadata' +
-    '&iiurlwidth=800';
-
-
-  const response =
-    UrlFetchApp.fetch(
-      url,
-      {
-        method: 'get',
-        muteHttpExceptions: true,
-        headers: {
-          Accept: 'application/json'
-        }
-      }
-    );
-
-
-  const code =
-    response.getResponseCode();
-
-
-  if (code !== 200) {
-
-    console.log(
-      'Wikimedia HTTP ' +
-      code +
-      ': ' +
-      response.getContentText()
-    );
-
-    return [];
-
-  }
-
-
-  let data = null;
-
+  const results = [];
 
   try {
 
-    data =
-      JSON.parse(
-        response.getContentText()
+    const apiUrl =
+      'https://api.openverse.org/v1/images/?q=' +
+      encodeURIComponent(query) +
+      '&page_size=20';
+
+    const response =
+      UrlFetchApp.fetch(
+        apiUrl,
+        {
+          muteHttpExceptions: true
+        }
       );
+
+    const code =
+      response.getResponseCode();
+
+    if (code !== 200) {
+      return [];
+    }
+
+    const data =
+      JSON.parse(response.getContentText());
+
+    if (!data.results ||
+        !Array.isArray(data.results)) {
+      return [];
+    }
+
+    data.results.forEach(function(item) {
+
+      const imageUrl =
+        item.thumbnail ||
+        item.url ||
+        '';
+
+      if (!imageUrl) {
+        return;
+      }
+
+      results.push({
+        url: imageUrl,
+        title:
+          item.title ||
+          query
+      });
+
+    });
 
   } catch (error) {
 
     console.log(
-      'Wikimedia JSON error: ' +
+      'Openverse image search error: ' +
       error
     );
 
-    return [];
-
   }
 
+  return results;
+}
 
-  if (
-    !data ||
-    !data.query ||
-    !data.query.pages
-  ) {
+/* =========================================
+   WIKIMEDIA COMMONS SEARCH
+========================================= */
 
+function searchWikimediaImages_(query) {
+
+  query = String(query || '').trim();
+
+  if (!query) {
     return [];
-
   }
 
+  const results = [];
 
-  const pages =
-    data.query.pages;
+  try {
 
+    const apiUrl =
+      'https://commons.wikimedia.org/w/api.php' +
+      '?action=query' +
+      '&format=json' +
+      '&generator=search' +
+      '&gsrsearch=' +
+      encodeURIComponent(query) +
+      '&gsrnamespace=6' +
+      '&gsrlimit=20' +
+      '&prop=imageinfo' +
+      '&iiprop=url|mime|extmetadata' +
+      '&iiurlwidth=800';
 
-  return Object.keys(pages)
-    .map(function(id) {
+    const response =
+      UrlFetchApp.fetch(
+        apiUrl,
+        {
+          muteHttpExceptions: true,
+          headers: {
+            'User-Agent':
+              'VocabularyHub/1.0 GoogleAppsScript'
+          }
+        }
+      );
+
+    const code =
+      response.getResponseCode();
+
+    if (code !== 200) {
+      return [];
+    }
+
+    const data =
+      JSON.parse(response.getContentText());
+
+    if (!data.query || !data.query.pages) {
+      return [];
+    }
+
+    Object.keys(data.query.pages).forEach(function(id) {
 
       const page =
-        pages[id];
+        data.query.pages[id];
 
-
-      if (!page) {
-        return null;
+      if (!page.imageinfo ||
+          !page.imageinfo.length) {
+        return;
       }
-
 
       const info =
-        page.imageinfo &&
         page.imageinfo[0];
 
-
-      if (!info) {
-        return null;
-      }
-
-
-      const metadata =
-        info.extmetadata || {};
-
-
-      let description = '';
-
+      const mime =
+        String(info.mime || '').toLowerCase();
 
       if (
-        metadata.ImageDescription &&
-        metadata.ImageDescription.value
+        mime &&
+        mime.indexOf('image/') !== 0
       ) {
-
-        description =
-          String(
-            metadata.ImageDescription.value
-          );
-
+        return;
       }
 
+      const imageUrl =
+        info.thumburl ||
+        info.url ||
+        '';
 
-      return {
+      if (!imageUrl) {
+        return;
+      }
 
-        imageUrl:
-          info.thumburl ||
-          info.url ||
-          '',
-
+      results.push({
+        url: imageUrl,
         title:
-          page.title
-            ? String(
-                page.title
-              ).replace(
-                /^File:/i,
-                ''
-              )
-            : '',
-
-        description:
-          description,
-
-        tags: ''
-
-      };
-
-    })
-    .filter(function(item) {
-
-      return (
-        item &&
-        item.imageUrl
-      );
+          page.title ||
+          query
+      });
 
     });
 
-}
+  } catch (error) {
 
+    console.log(
+      'Wikimedia image search error: ' +
+      error
+    );
+
+  }
+
+  return results;
+}
 
 /* =========================================
    COMMON IMAGE SEARCH STOP WORDS
@@ -3135,71 +2770,34 @@ function isCommonImageStopWord_(word) {
    ADD IMAGE RESULT
 ========================================= */
 
-function addImageResult_(
-  images,
-  item,
-  word,
-  source
-) {
+function addImageResults_(target, source) {
 
-  if (!item) {
+  if (!source ||
+      !Array.isArray(source)) {
     return;
   }
 
+  source.forEach(function(item) {
 
-  const imageUrl =
-    item.url ||
-    item.imageUrl ||
-    item.image ||
-    item.src ||
-    '';
+    if (!item) {
+      return;
+    }
 
-
-  if (!imageUrl) {
-    return;
-  }
-
-
-  const exists =
-    images.some(
-      function(existing) {
-
-        return (
-          existing.imageUrl ===
-          imageUrl
-        );
-
-      }
-    );
-
-
-  if (exists) {
-    return;
-  }
-
-
-  images.push({
-
-    imageUrl:
-      String(imageUrl),
-
-    thumbnailUrl:
+    const url =
       String(
-        item.thumbnail ||
-        item.thumbnailUrl ||
-        imageUrl
-      ),
+        item.url ||
+        item.URL ||
+        ''
+      ).trim();
 
-    title:
-      String(
-        item.description ||
-        item.title ||
-        word
-      ),
+    if (!url) {
+      return;
+    }
 
-    source:
-      source
+    target.push({
+      url: url,
+      title: item.title || ''
+    });
 
   });
-
 }

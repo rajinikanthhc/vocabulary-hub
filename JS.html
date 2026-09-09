@@ -1282,6 +1282,19 @@ function openEdit(word) {
     .value =
       word.Image || '';
 
+      document.getElementById('editImageUrl').value = '';
+
+document.getElementById(
+  'editAutomaticImagePreview'
+).innerHTML = '';
+
+document.getElementById(
+  'editImageUploadStatus'
+).textContent = '';
+
+automaticImageChoices = [];
+automaticImageIndex = 0;
+
 
   document
     .getElementById('editImageFile')
@@ -2689,273 +2702,77 @@ let automaticImageIndex = 0;
 
 function autoFillWordData() {
 
-  const input =
-    document.getElementById('addWord');
-
-  const word =
-    input.value.trim();
-
+  const wordInput = document.getElementById('addWord');
+  const word = wordInput.value.trim();
 
   if (!word) {
-
-    alert(
-      'Please enter a word first.'
-    );
-
-    input.focus();
-
+    alert('Please enter a word first.');
+    wordInput.focus();
     return;
-
   }
 
+  const button = document.querySelector(
+    '#addWordModal .autoFillButton'
+  );
 
-  const button =
-    document.querySelector(
-      '.autoFillButton'
-    );
-
-
-  const oldText =
-    button.textContent;
-
-
-  button.disabled = true;
-
-  button.textContent =
-    '⏳ Loading...';
-
-
-  /* =====================================
-     GET WORD INFORMATION
-  ====================================== */
+  if (button) {
+    button.disabled = true;
+    button.textContent = '⏳ Filling...';
+  }
 
   google.script.run
-
-    .withSuccessHandler(
-      function(data) {
-
-        if (!data) {
-
-          button.disabled = false;
-
-          button.textContent =
-            oldText;
-
-          alert(
-            'No information found for "' +
-            word +
-            '".'
-          );
-
-          return;
-
-        }
-
-
-        /* =================================
-           FILL WORD INFORMATION
-        ================================= */
-
-        document.getElementById(
-          'addMeaning'
-        ).value =
-          data.Meaning || '';
-
-
-        document.getElementById(
-          'addPhonics'
-        ).value =
-          data.Phonics || '';
-
-
-        document.getElementById(
-          'addIPA'
-        ).value =
-          data.IPA || '';
-
-
-        document.getElementById(
-          'addSyllable'
-        ).value =
-          data.Syllable || '';
-
-
-        const category =
-          document.getElementById(
-            'addCategory'
-          );
-
-
-        if (category) {
-
-          category.value =
-            data.Category || '';
-
-        }
-
-
-        const level =
-          document.getElementById(
-            'addLevel'
-          );
-
-
-        if (level) {
-
-          level.value =
-            data.Level || '';
-
-        }
-
-
-        /* =================================
-           FIND PICTURES
-        ================================= */
-
-        const status =
-          document.getElementById(
-            'imageUploadStatus'
-          );
-
-
-        if (status) {
-
-          status.textContent =
-            '🔎 Finding pictures...';
-
-        }
-
-
-        google.script.run
-
-          .withSuccessHandler(
-            function(result) {
-
-              button.disabled =
-                false;
-
-              button.textContent =
-                oldText;
-
-
-              if (
-                !result ||
-                !Array.isArray(
-                  result.images
-                ) ||
-                result.images.length === 0
-              ) {
-
-                automaticImageChoices =
-                  [];
-
-                automaticImageIndex =
-                  0;
-
-
-                const imageUrl =
-                  document.getElementById(
-                    'addImageUrl'
-                  );
-
-
-                if (imageUrl) {
-
-                  imageUrl.value =
-                    '';
-
-                }
-
-
-                if (status) {
-
-                  status.textContent =
-                    '⚠️ No picture found. You can upload one manually.';
-
-                }
-
-                return;
-
-              }
-
-
-              automaticImageChoices =
-                result.images;
-
-
-              automaticImageIndex =
-                0;
-
-
-              showAutomaticImageChoice();
-
-
-              if (status) {
-
-                status.textContent =
-                  '✓ Choose a picture';
-
-              }
-
-            }
-          )
-
-          .withFailureHandler(
-            function(error) {
-
-              button.disabled =
-                false;
-
-              button.textContent =
-                oldText;
-
-
-              console.error(
-                'Image search error:',
-                error
-              );
-
-
-              if (status) {
-
-                status.textContent =
-                  '⚠️ Picture search failed. You can upload one manually.';
-
-              }
-
-            }
-          )
-
-          .searchFreeImages(
-  word,
-  data.Meaning,
-  data.Category
-);
-
+    .withSuccessHandler(function(data) {
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = '✨ Auto Fill';
       }
-    )
 
-    .withFailureHandler(
-      function(error) {
-
-        button.disabled =
-          false;
-
-        button.textContent =
-          oldText;
-
-
-        alert(
-          error.message ||
-          'Unable to load word information.'
-        );
-
+      if (!data) {
+        alert('No automatic information found.');
+        return;
       }
-    )
 
-    .getAutomaticWordData(
-      word
-    );
+      document.getElementById('addMeaning').value =
+        data.Meaning || '';
+
+      document.getElementById('addPhonics').value =
+        data.Phonics || '';
+
+      document.getElementById('addIPA').value =
+        data.IPA || '';
+
+      document.getElementById('addSyllable').value =
+        data.Syllable || '';
+
+      document.getElementById('addCategory').value =
+        data.Category || '';
+
+      document.getElementById('addLevel').value =
+        data.Level || '';
+
+      document.getElementById('imageUploadStatus').textContent =
+        '✓ Information filled. Correct Category/Meaning, then click 🔎 Search Image.';
+
+    })
+    .withFailureHandler(function(error) {
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = '✨ Auto Fill';
+      }
+
+      alert(
+        'Unable to get automatic information:\n' +
+        (
+          error && error.message
+            ? error.message
+            : error
+        )
+      );
+
+    })
+    .getAutomaticWordData(word);
 
 }
 
@@ -3290,268 +3107,274 @@ function showAutomaticImageChoice() {
 
 function autoFillEditWordData() {
 
-  const input =
-    document.getElementById(
-      'editWord'
-    );
-
-  const word =
-    input.value.trim();
-
+  const wordInput = document.getElementById('editWord');
+  const word = wordInput.value.trim();
 
   if (!word) {
-
-    alert(
-      'Please enter a word first.'
-    );
-
-    input.focus();
-
+    alert('Please enter a word first.');
+    wordInput.focus();
     return;
-
   }
 
+  const button = document.querySelector(
+    '#editModal .autoFillButton'
+  );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = '⏳ Filling...';
+  }
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = '✨ Auto Fill';
+      }
+
+      if (!data) {
+        alert('No automatic information found.');
+        return;
+      }
+
+      document.getElementById('editMeaning').value =
+        data.Meaning || '';
+
+      document.getElementById('editPhonics').value =
+        data.Phonics || '';
+
+      document.getElementById('editIPA').value =
+        data.IPA || '';
+
+      document.getElementById('editSyllable').value =
+        data.Syllable || '';
+
+      document.getElementById('editCategory').value =
+        data.Category || '';
+
+      document.getElementById('editLevel').value =
+        data.Level || '';
+
+      document.getElementById('editImageUploadStatus').textContent =
+        '✓ Information filled. Correct Category/Meaning, then click 🔎 Search Image.';
+
+    })
+    .withFailureHandler(function(error) {
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = '✨ Auto Fill';
+      }
+
+      alert(
+        'Unable to get automatic information:\n' +
+        (
+          error && error.message
+            ? error.message
+            : error
+        )
+      );
+
+    })
+    .getAutomaticWordData(word);
+
+}
+
+function searchAddImages() {
+
+  const word =
+    document.getElementById('addWord').value.trim();
+
+  const meaning =
+    document.getElementById('addMeaning').value.trim();
+
+  const category =
+    document.getElementById('addCategory').value.trim();
+
+  if (!word) {
+    alert('Please enter a word first.');
+    return;
+  }
+
+  if (!meaning) {
+    alert('Please enter or correct the Meaning first.');
+    return;
+  }
 
   const button =
     document.querySelector(
-      '#editModal .autoFillButton'
+      '#addWordModal .searchImageButton'
     );
 
-
-  const oldText =
-    button
-      ? button.textContent
-      : '✨ Auto Fill';
-
-
   if (button) {
-
-    button.disabled =
-      true;
-
-    button.textContent =
-      '⏳ Loading...';
-
+    button.disabled = true;
+    button.textContent = '⏳ Searching...';
   }
 
+  document.getElementById(
+    'automaticImagePreview'
+  ).innerHTML =
+    '<div>Searching for pictures...</div>';
 
   google.script.run
-
-    .withSuccessHandler(
-      function(data) {
-
-        if (button) {
-
-          button.disabled =
-            false;
-
-          button.textContent =
-            oldText;
-
-        }
-
-
-        if (!data) {
-
-          alert(
-            'No information found for "' +
-            word +
-            '".'
-          );
-
-          return;
-
-        }
-
-
-        /* ================================
-           FILL WORD INFORMATION
-        ================================= */
-
-        document
-          .getElementById(
-            'editMeaning'
-          )
-          .value =
-            data.Meaning || '';
-
-
-        document
-          .getElementById(
-            'editPhonics'
-          )
-          .value =
-            data.Phonics || '';
-
-
-        document
-          .getElementById(
-            'editIPA'
-          )
-          .value =
-            data.IPA || '';
-
-
-        document
-          .getElementById(
-            'editSyllable'
-          )
-          .value =
-            data.Syllable || '';
-
-
-        document
-          .getElementById(
-            'editCategory'
-          )
-          .value =
-            data.Category || '';
-
-
-        document
-          .getElementById(
-            'editLevel'
-          )
-          .value =
-            data.Level || '';
-
-
-        /* ================================
-           FIND PICTURES
-        ================================= */
-
-        const preview =
-          document.getElementById(
-            'editAutomaticImagePreview'
-          );
-
-
-        const status =
-          document.getElementById(
-            'editImageUploadStatus'
-          );
-
-
-        if (status) {
-
-          status.textContent =
-            '🔎 Finding pictures...';
-
-        }
-
-
-        google.script.run
-
-          .withSuccessHandler(
-            function(result) {
-
-              if (
-                !result ||
-                !Array.isArray(
-                  result.images
-                ) ||
-                result.images.length === 0
-              ) {
-
-                automaticImageChoices =
-                  [];
-
-                automaticImageIndex =
-                  0;
-
-
-                if (preview) {
-
-                  preview.innerHTML =
-                    '';
-
-                }
-
-
-                if (status) {
-
-                  status.textContent =
-                    '⚠️ No picture found. You can upload one manually.';
-
-                }
-
-                return;
-
-              }
-
-
-              automaticImageChoices =
-                result.images;
-
-              automaticImageIndex =
-                0;
-
-
-              showEditAutomaticImageChoice();
-
-
-              if (status) {
-
-                status.textContent =
-                  '✓ Choose a picture';
-
-              }
-
-            }
-          )
-
-          .withFailureHandler(
-            function(error) {
-
-              console.error(
-                'Image search error:',
-                error
-              );
-
-
-              if (status) {
-
-                status.textContent =
-                  '⚠️ Picture search failed. You can upload one manually.';
-
-              }
-
-            }
-          )
-
-          .searchFreeImages(
-  word,
-  data.Meaning,
-  data.Category
-);
-
+    .withSuccessHandler(function(images) {
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = '🔎 Search Image';
       }
-    )
 
-    .withFailureHandler(
-      function(error) {
+      automaticImageChoices = images || [];
+      automaticImageIndex = 0;
 
-        if (button) {
+      if (!automaticImageChoices.length) {
 
-          button.disabled =
-            false;
+        document.getElementById(
+          'automaticImagePreview'
+        ).innerHTML =
+          '<div>No picture found. Try correcting the Category or Meaning and search again.</div>';
 
-          button.textContent =
-            oldText;
+        document.getElementById(
+          'imageUploadStatus'
+        ).textContent = '';
 
-        }
-
-
-        alert(
-          error.message ||
-          'Unable to load word information.'
-        );
-
+        return;
       }
-    )
 
-    .getAutomaticWordData(
-      word
+      showAutomaticImageChoice();
+
+      document.getElementById(
+        'imageUploadStatus'
+      ).textContent =
+        '✓ Pictures found. Select the correct picture.';
+
+    })
+    .withFailureHandler(function(error) {
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = '🔎 Search Image';
+      }
+
+      document.getElementById(
+        'automaticImagePreview'
+      ).innerHTML =
+        '<div>Unable to search for pictures.</div>';
+
+      alert(
+        'Image search failed:\n' +
+        (
+          error && error.message
+            ? error.message
+            : error
+        )
+      );
+
+    })
+    .searchFreeImages(
+      word,
+      meaning,
+      category
+    );
+
+}
+
+function searchEditImages() {
+
+  const word =
+    document.getElementById('editWord').value.trim();
+
+  const meaning =
+    document.getElementById('editMeaning').value.trim();
+
+  const category =
+    document.getElementById('editCategory').value.trim();
+
+  if (!word) {
+    alert('Please enter a word first.');
+    return;
+  }
+
+  if (!meaning) {
+    alert('Please enter or correct the Meaning first.');
+    return;
+  }
+
+  const button =
+    document.querySelector(
+      '#editModal .searchImageButton'
+    );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = '⏳ Searching...';
+  }
+
+  document.getElementById(
+    'editAutomaticImagePreview'
+  ).innerHTML =
+    '<div>Searching for pictures...</div>';
+
+  google.script.run
+    .withSuccessHandler(function(images) {
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = '🔎 Search Image';
+      }
+
+      automaticImageChoices = images || [];
+      automaticImageIndex = 0;
+
+      if (!automaticImageChoices.length) {
+
+        document.getElementById(
+          'editAutomaticImagePreview'
+        ).innerHTML =
+          '<div>No picture found. Try correcting the Category or Meaning and search again.</div>';
+
+        document.getElementById(
+          'editImageUploadStatus'
+        ).textContent = '';
+
+        return;
+      }
+
+      showEditAutomaticImageChoice();
+
+      document.getElementById(
+        'editImageUploadStatus'
+      ).textContent =
+        '✓ Pictures found. Select the correct picture.';
+
+    })
+    .withFailureHandler(function(error) {
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = '🔎 Search Image';
+      }
+
+      document.getElementById(
+        'editAutomaticImagePreview'
+      ).innerHTML =
+        '<div>Unable to search for pictures.</div>';
+
+      alert(
+        'Image search failed:\n' +
+        (
+          error && error.message
+            ? error.message
+            : error
+        )
+      );
+
+    })
+    .searchFreeImages(
+      word,
+      meaning,
+      category
     );
 
 }
