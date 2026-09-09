@@ -1516,32 +1516,32 @@ function getMerriamWebsterEntry_(
 
 /* =========================================
    EXTRACT MERRIAM-WEBSTER DEFINITION
+
+   If multiple dictionary meanings exist,
+   choose ONE complete, clear, short meaning.
 ========================================= */
 
 function extractMerriamDefinition_(entry) {
 
   try {
 
-    /*
-     * Merriam-Webster provides a clean
-     * short definition in "shortdef".
-     */
-
     if (
-      entry &&
-      Array.isArray(entry.shortdef) &&
-      entry.shortdef.length
+      !entry ||
+      !Array.isArray(entry.shortdef) ||
+      !entry.shortdef.length
     ) {
 
-      for (
-        let i = 0;
-        i < entry.shortdef.length;
-        i++
-      ) {
+      return '';
 
-        const definition =
-          String(
-            entry.shortdef[i] || ''
+    }
+
+
+    const definitions =
+      entry.shortdef
+        .map(function(definition) {
+
+          return String(
+            definition || ''
           )
             .replace(/\{bc\}/g, '')
             .replace(/\{it\}/g, '')
@@ -1555,129 +1555,40 @@ function extractMerriamDefinition_(entry) {
             .replace(/\s+/g, ' ')
             .trim();
 
+        })
+        .filter(function(definition) {
 
-        if (definition) {
+          return definition !== '';
 
-          return definition;
+        });
 
-        }
 
-      }
-
+    if (!definitions.length) {
+      return '';
     }
 
 
-    /*
-     * Backup: extract the first actual
-     * "text" item from the definition structure.
-     */
+    /* =====================================
+       ONE COMPLETE DICTIONARY MEANING
 
-    if (
-      entry &&
-      Array.isArray(entry.def)
-    ) {
+       Choose the shortest complete definition.
+       We are NOT cutting or rewriting it.
+    ====================================== */
 
-      function findDefinitionText(value) {
+    definitions.sort(
+      function(a, b) {
 
-        if (!value) {
-          return '';
-        }
-
-
-        /*
-         * A Merriam-Webster text node looks like:
-         *
-         * ["text", "actual definition"]
-         */
-
-        if (
-          Array.isArray(value) &&
-          value.length >= 2 &&
-          value[0] === 'text'
-        ) {
-
-          return String(
-            value[1] || ''
-          )
-            .replace(/\{bc\}/g, '')
-            .replace(/\{it\}/g, '')
-            .replace(/\{\/it\}/g, '')
-            .replace(/\{b\}/g, '')
-            .replace(/\{\/b\}/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-
-        }
-
-
-        if (Array.isArray(value)) {
-
-          for (
-            let i = 0;
-            i < value.length;
-            i++
-          ) {
-
-            const result =
-              findDefinitionText(
-                value[i]
-              );
-
-
-            if (result) {
-
-              return result;
-
-            }
-
-          }
-
-        }
-
-
-        if (
-          typeof value === 'object'
-        ) {
-
-          for (
-            const key in value
-          ) {
-
-            const result =
-              findDefinitionText(
-                value[key]
-              );
-
-
-            if (result) {
-
-              return result;
-
-            }
-
-          }
-
-        }
-
-
-        return '';
-
-      }
-
-
-      const definition =
-        findDefinitionText(
-          entry.def
+        return (
+          a.length -
+          b.length
         );
 
-
-      if (definition) {
-
-        return definition;
-
       }
+    );
 
-    }
+
+    return definitions[0];
+
 
   } catch (error) {
 
@@ -1686,10 +1597,9 @@ function extractMerriamDefinition_(entry) {
       error
     );
 
+    return '';
+
   }
-
-
-  return '';
 
 }
 

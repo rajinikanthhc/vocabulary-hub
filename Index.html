@@ -234,13 +234,29 @@
 
     <div class="modalCard">
 
-      <button
-        class="closeButton"
-        onclick="closeWord()">
+  <div class="modalTopActions">
 
-        ×
+    <button
+      type="button"
+      class="modalEditButton"
+      onclick="openEdit(currentWord)"
+      title="Edit Word">
 
-      </button>
+      ✏️
+
+    </button>
+
+    <button
+      type="button"
+      class="closeButton"
+      onclick="closeWord()"
+      title="Close">
+
+      ×
+
+    </button>
+
+  </div>
 
 
       <div

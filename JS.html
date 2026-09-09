@@ -1363,6 +1363,7 @@ function closeEdit() {
 
 /* =========================================
    SAVE EDITED WORD
+   Saves automatic image to GitHub first
 ========================================= */
 
 function saveEditedWord() {
@@ -1371,6 +1372,10 @@ function saveEditedWord() {
     return;
   }
 
+
+  /* =====================================
+     READ ALL FIELDS
+  ====================================== */
 
   const updatedWord = {
 
@@ -1420,23 +1425,20 @@ function saveEditedWord() {
         .trim(),
 
     Image:
-  (
-    document
-      .getElementById('editImageUrl')
-      .value
-      .trim()
-      ? currentWord.Image || ''
-      : document
-          .getElementById('editImage')
-          .value
-          .trim()
-  ),
+      document
+        .getElementById('editImage')
+        .value
+        .trim(),
 
     Favorite:
       currentWord.Favorite || ''
 
   };
 
+
+  /* =====================================
+     VALIDATION
+  ====================================== */
 
   if (!updatedWord.Word) {
 
@@ -1449,60 +1451,225 @@ function saveEditedWord() {
   }
 
 
-  google.script.run
+  /* =====================================
+     CHECK AUTOMATIC IMAGE URL
+  ====================================== */
 
-    .withSuccessHandler(
-      function () {
-
-        const index =
-          vocabulary.findIndex(
-            function (item) {
-
-              return String(
-                item.ID
-              ) ===
-              String(
-                updatedWord.ID
-              );
-
-            }
-          );
+  const imageUrl =
+    document
+      .getElementById('editImageUrl')
+      .value
+      .trim();
 
 
-        if (index !== -1) {
-
-          vocabulary[index] =
-            updatedWord;
-
-        }
-
-
-        closeEdit();
-
-        populateFilters();
-
-        applyFilters();
-
-      }
-    )
-
-    .withFailureHandler(
-      function (error) {
-
-        alert(
-          error.message ||
-          'Unable to save changes.'
-        );
-
-      }
-    )
-
-    .updateVocabulary(
-      updatedWord
+  const status =
+    document.getElementById(
+      'editImageUploadStatus'
     );
 
-}
 
+  /* =====================================
+     SAVE WORD TO SHEET
+  ====================================== */
+
+  function saveWordToSheet() {
+
+    google.script.run
+
+      .withSuccessHandler(
+        function() {
+
+          const index =
+            vocabulary.findIndex(
+              function(item) {
+
+                return String(
+                  item.ID
+                ) ===
+                String(
+                  updatedWord.ID
+                );
+
+              }
+            );
+
+
+          if (index !== -1) {
+
+            vocabulary[index] =
+              updatedWord;
+
+          }
+
+
+          currentWord =
+            updatedWord;
+
+
+          if (status) {
+
+            status.textContent =
+              '✓ Changes saved';
+
+          }
+
+
+          closeEdit();
+
+          populateFilters();
+
+          applyFilters();
+
+        }
+      )
+
+      .withFailureHandler(
+        function(error) {
+
+          if (status) {
+
+            status.textContent =
+              '';
+
+          }
+
+          alert(
+            error.message ||
+            'Unable to save changes.'
+          );
+
+        }
+      )
+
+      .updateVocabulary(
+        updatedWord
+      );
+
+  }
+
+
+  /* =====================================
+     AUTOMATIC IMAGE SELECTED
+  ====================================== */
+
+  if (imageUrl) {
+
+    if (status) {
+
+      status.textContent =
+        '⬇️ Downloading picture...';
+
+    }
+
+
+    google.script.run
+
+      .withSuccessHandler(
+        function(result) {
+
+          const imageName =
+            result &&
+            (
+              result.fileName ||
+              result.path ||
+              ''
+            );
+
+
+          if (!imageName) {
+
+            if (status) {
+
+              status.textContent =
+                '';
+
+            }
+
+            alert(
+              'Picture downloaded, but GitHub filename was not returned.'
+            );
+
+            return;
+
+          }
+
+
+          const cleanImageName =
+            String(imageName)
+              .split('/')
+              .pop();
+
+
+          /* ===============================
+             USE NEW GITHUB IMAGE
+          =============================== */
+
+          updatedWord.Image =
+            cleanImageName;
+
+
+          if (status) {
+
+            status.textContent =
+              '✓ Picture uploaded to GitHub. Saving changes...';
+
+          }
+
+
+          saveWordToSheet();
+
+        }
+      )
+
+      .withFailureHandler(
+        function(error) {
+
+          if (status) {
+
+            status.textContent =
+              '';
+
+          }
+
+          alert(
+            'Unable to download/upload picture:\n' +
+            (
+              error.message ||
+              'Unknown error'
+            )
+          );
+
+        }
+      )
+
+      .uploadVocabularyImageFromUrl(
+        imageUrl,
+        updatedWord.Word,
+        updatedWord.Category
+      );
+
+
+    return;
+
+  }
+
+
+  /* =====================================
+     NO AUTOMATIC IMAGE
+     JUST SAVE OTHER CHANGES
+  ====================================== */
+
+  if (status) {
+
+    status.textContent =
+      'Saving changes...';
+
+  }
+
+
+  saveWordToSheet();
+
+}
 
 /* =========================================
    OPEN ADD WORD
