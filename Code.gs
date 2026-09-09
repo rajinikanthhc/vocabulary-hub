@@ -33,7 +33,6 @@ function include(filename) {
 
 }
 
-
 /* =========================================
    GET VOCABULARY
 ========================================= */
@@ -61,11 +60,6 @@ function getVocabulary() {
     return [];
   }
 
-
-  /* =====================================
-     READ HEADERS
-  ====================================== */
-
   const headers =
     data[0].map(function(header) {
 
@@ -76,38 +70,37 @@ function getVocabulary() {
     });
 
 
-  /* =====================================
-     FIND COLUMNS
-  ====================================== */
-
   const columns = {};
 
-  headers.forEach(function(header, index) {
+  headers.forEach(
+    function(header, index) {
 
-    const key =
-      header
-        .toLowerCase()
-        .replace(/[^a-z]/g, '');
+      const key =
+        header
+          .toLowerCase()
+          .replace(/[^a-z]/g, '');
 
-    columns[key] = index;
+      columns[key] =
+        index;
 
-  });
+    }
+  );
 
-
-  /* =====================================
-     RETURN WORDS
-  ====================================== */
 
   return data
     .slice(1)
 
     .filter(function(row) {
 
-      return row.some(function(cell) {
+      return row.some(
+        function(cell) {
 
-        return String(cell).trim() !== '';
+          return String(
+            cell
+          ).trim() !== '';
 
-      });
+        }
+      );
 
     })
 
@@ -181,6 +174,141 @@ function getVocabulary() {
 
 }
 
+
+/* =========================================
+   GET CATEGORY & LEVEL FILTERS
+   Reads directly from Vocabulary sheet
+========================================= */
+
+function getVocabularyFilters() {
+
+  const sheet =
+  SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName('Vocabulary');
+
+  if (!sheet) {
+
+    throw new Error(
+      'Vocabulary sheet not found.'
+    );
+
+  }
+
+  const values =
+    sheet
+      .getDataRange()
+      .getDisplayValues();
+
+  if (values.length < 2) {
+
+    return {
+      categories: [],
+      levels: []
+    };
+
+  }
+
+  const headers =
+    values[0].map(function(header) {
+
+      return String(header)
+        .trim()
+        .toLowerCase();
+
+    });
+
+  const categoryIndex =
+    headers.indexOf('category');
+
+  const levelIndex =
+    headers.indexOf('level');
+
+
+  const categories = [];
+  const levels = [];
+
+
+  values.slice(1).forEach(
+    function(row) {
+
+      if (categoryIndex !== -1) {
+
+        const category =
+          String(
+            row[categoryIndex] || ''
+          ).trim();
+
+        if (
+          category &&
+          !categories.includes(category)
+        ) {
+
+          categories.push(category);
+
+        }
+
+      }
+
+
+      if (levelIndex !== -1) {
+
+        const level =
+          String(
+            row[levelIndex] || ''
+          ).trim();
+
+        if (
+          level &&
+          !levels.includes(level)
+        ) {
+
+          levels.push(level);
+
+        }
+
+      }
+
+    }
+  );
+
+
+  categories.sort(
+    function(a, b) {
+
+      return a.localeCompare(
+        b,
+        undefined,
+        {
+          sensitivity: 'base'
+        }
+      );
+
+    }
+  );
+
+
+  levels.sort(
+    function(a, b) {
+
+      return a.localeCompare(
+        b,
+        undefined,
+        {
+          sensitivity: 'base'
+        }
+      );
+
+    }
+  );
+
+
+  return {
+    categories: categories,
+    levels: levels
+  };
+
+}
 
 /* =========================================
    GET CELL VALUE
