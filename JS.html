@@ -1605,29 +1605,59 @@ function saveEditedWord() {
 
           if (index !== -1) {
 
-            vocabulary[index] =
-              updatedWord;
+  vocabulary[index] =
+    updatedWord;
 
-          }
-
-
-          currentWord =
-            updatedWord;
+}
 
 
-          if (status) {
+/* =====================================
+   UPDATE THE WORD IN CURRENT LIST
+   WITHOUT RESETTING SHUFFLE ORDER
+===================================== */
 
-            status.textContent =
-              '✓ Changes saved';
+const filteredIndex =
+  filteredVocabulary.findIndex(
+    function(item) {
 
-          }
+      return String(item.ID) ===
+        String(updatedWord.ID);
+
+    }
+  );
 
 
-          closeEdit();
+if (filteredIndex !== -1) {
 
-          populateFilters();
+  filteredVocabulary[filteredIndex] =
+    updatedWord;
 
-          applyFilters();
+}
+
+
+currentWord =
+  updatedWord;
+
+
+if (status) {
+
+  status.textContent =
+    '✓ Changes saved';
+
+}
+
+
+closeEdit();
+
+
+/*
+ * Refresh the cards using the
+ * existing order.
+ *
+ * This preserves Shuffle order.
+ */
+
+renderWords();
 
         }
       )
