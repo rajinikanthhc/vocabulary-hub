@@ -10,6 +10,8 @@ let favoriteOnly = false;
 
 let currentWordIndex = -1;
 
+let preloadedImages = {};
+
 
 /* =========================================
    START
@@ -37,11 +39,11 @@ function loadVocabulary() {
       function (data) {
 
         vocabulary =
-          data || [];
+  data || [];
 
-        populateFilters();
+populateFilters();
 
-        applyFilters();
+applyFilters();
 
       }
     )
@@ -65,6 +67,104 @@ function loadVocabulary() {
     )
 
     .getVocabulary();
+
+}
+
+
+/* =========================================
+   PRELOAD IMAGES
+========================================= */
+
+function preloadImagesForWords(
+  words,
+  startIndex,
+  count
+) {
+
+  if (!words || !words.length) {
+    return;
+  }
+
+  const start =
+    Math.max(
+      0,
+      Number(startIndex) || 0
+    );
+
+  const end =
+    Math.min(
+      words.length,
+      start + (Number(count) || 10)
+    );
+
+
+  for (
+    let i = start;
+    i < end;
+    i++
+  ) {
+
+    const word =
+      words[i];
+
+
+    if (
+      !word ||
+      !word.Image
+    ) {
+
+      continue;
+
+    }
+
+
+    const imageUrl =
+      'https://raw.githubusercontent.com/' +
+      'rajinikanthhc/images/main/vocabulary/' +
+      encodeURIComponent(
+        word.Image
+      );
+
+
+    // Already loading or loaded
+    if (
+      preloadedImages[imageUrl]
+    ) {
+
+      continue;
+
+    }
+
+
+    const img =
+      new Image();
+
+
+    preloadedImages[imageUrl] =
+      img;
+
+
+    img.onload =
+      function () {
+
+        preloadedImages[imageUrl] =
+          img;
+
+      };
+
+
+    img.onerror =
+      function () {
+
+        delete preloadedImages[imageUrl];
+
+      };
+
+
+    img.src =
+      imageUrl;
+
+  }
 
 }
 
@@ -379,6 +479,13 @@ function applyFilters() {
 
 
   renderWords();
+
+  // Prepare the first images for the current filtered list
+  preloadImagesForWords(
+    filteredVocabulary,
+    0,
+    15
+  );
 
 
   document
@@ -861,40 +968,65 @@ function openWord(word) {
 
   if (word.Image) {
 
-    const image =
-      document.createElement(
-        'img'
-      );
+  const imageUrl =
+    'https://raw.githubusercontent.com/' +
+    'rajinikanthhc/images/main/vocabulary/' +
+    encodeURIComponent(
+      word.Image
+    );
 
+
+  const image =
+    document.createElement(
+      'img'
+    );
+
+
+  image.alt =
+    word.Word ||
+    'Vocabulary image';
+
+
+  image.onerror =
+    function () {
+
+      imageBox.innerHTML =
+        '';
+
+    };
+
+
+  /*
+     Use preloaded image if available.
+  */
+
+  if (
+    preloadedImages[imageUrl]
+  ) {
 
     image.src =
-      'https://raw.githubusercontent.com/' +
-      'rajinikanthhc/images/main/vocabulary/' +
-      encodeURIComponent(
-        word.Image
-      );
+      imageUrl;
 
+  } else {
 
-    image.alt =
-      word.Word ||
-      'Vocabulary image';
-
-
-    image.onerror =
-      function () {
-
-        imageBox.innerHTML =
-          '';
-
-      };
-
-
-    imageBox.appendChild(
-      image
-    );
+    image.src =
+      imageUrl;
 
   }
 
+
+  imageBox.appendChild(
+    image
+  );
+
+}
+
+// Keep upcoming words ready
+preloadImagesForWords(
+  filteredVocabulary,
+  currentWordIndex + 1,
+  10
+);
 
   updateModalFavorite();
 
@@ -1310,38 +1442,6 @@ automaticImageIndex = 0;
 
   preview.innerHTML =
     '';
-
-
-  if (word.Image) {
-
-    const img =
-      document.createElement(
-        'img'
-      );
-
-
-    img.src =
-      'https://raw.githubusercontent.com/' +
-      'rajinikanthhc/images/main/vocabulary/' +
-      encodeURIComponent(
-        word.Image
-      );
-
-
-    img.onerror =
-      function () {
-
-        this.style.display =
-          'none';
-
-      };
-
-
-    preview.appendChild(
-      img
-    );
-
-  }
 
 
   document
